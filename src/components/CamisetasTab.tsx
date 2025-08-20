@@ -392,96 +392,77 @@ export function CamisetasTab() {
           <h3 className="card-title">📦 Estoque Atual por Tamanho, Sponsor e Sexo</h3>
           <p className="card-description">Visualização rápida de todas as quantidades disponíveis</p>
         </div>
-        <div className="space-y-4 sm:space-y-6">
-          {Object.entries(camisetasPorSponsor).map(([sponsor, camisetas]) => (
-            <div key={sponsor} className="border border-gray-200 rounded-lg p-3 sm:p-4">
-              <h4 className="font-semibold text-gray-700 mb-3 sm:mb-4 text-center flex items-center justify-center gap-2">
-                <Building2 size={16} />
-                {sponsor}
-              </h4>
-              <div className="space-y-4 sm:space-y-6">
-                {/* Camisetas para Homens */}
-                <div>
-                  <h5 className="text-sm font-medium text-blue-600 text-center mb-2 sm:mb-3">👨 Homens</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 justify-items-center">
-                    {camisetas.filter(c => c.sexo === 'homem').map(camiseta => (
-                      <div 
-                        key={camiseta.id} 
-                        className={`stat-card border-2 border-blue-200 bg-blue-50 w-full max-w-[120px] ${
-                          camiseta.quantidadeAtual === 0 
-                            ? 'border-red-300 bg-red-100' 
-                            : camiseta.quantidadeAtual < 10 
-                            ? 'border-red-200 bg-red-50' 
-                            : ''
-                        }`}
-                      >
-                        <div className={`stat-value ${
-                          camiseta.quantidadeAtual === 0 
-                            ? 'text-red-700' 
-                            : camiseta.quantidadeAtual < 10 
-                            ? 'text-red-600' 
-                            : 'text-blue-700'
-                        }`}>
-                          {camiseta.quantidadeAtual}
-                        </div>
-                        <div className="stat-label text-blue-800">{camiseta.tamanho}</div>
-                        <div className="text-xs text-blue-600 mt-1 font-medium">
-                          👨 Homem
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Distribuído: {camiseta.quantidadeDistribuida}
-                        </div>
-                        {camiseta.quantidadeAtual === 0 ? (
-                          <div className="text-xs text-red-700 font-bold mt-1">🚫 Estoque acabou!</div>
-                        ) : camiseta.quantidadeAtual < 10 ? (
-                          <div className="text-xs text-red-600 font-medium mt-1">⚠️ Estoque baixo!</div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Camisetas para Mulheres */}
-                <div>
-                  <h5 className="text-sm font-medium text-pink-600 text-center mb-2 sm:mb-3">👩 Mulheres</h5>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 justify-items-center">
-                    {camisetas.filter(c => c.sexo === 'mulher').map(camiseta => (
-                      <div 
-                        key={camiseta.id} 
-                        className={`stat-card border-2 border-pink-200 bg-pink-50 w-full max-w-[120px] ${
-                          camiseta.quantidadeAtual === 0 
-                            ? 'border-red-300 bg-red-100' 
-                            : camiseta.quantidadeAtual < 10 
-                            ? 'border-red-200 bg-red-50' 
-                            : ''
-                        }`}
-                      >
-                        <div className={`stat-value ${
-                          camiseta.quantidadeAtual === 0 
-                            ? 'text-red-700' 
-                            : camiseta.quantidadeAtual < 10 
-                            ? 'text-red-600' 
-                            : 'text-pink-700'
-                        }`}>
-                          {camiseta.quantidadeAtual}
-                        </div>
-                        <div className="stat-label text-pink-800">{camiseta.tamanho}</div>
-                        <div className="text-xs text-pink-600 mt-1 font-medium">
-                          👩 Mulher
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                          Distribuído: {camiseta.quantidadeDistribuida}
-                        </div>
-                        {camiseta.quantidadeAtual === 0 ? (
-                          <div className="text-xs text-red-700 font-bold mt-1">🚫 Estoque acabou!</div>
-                        ) : camiseta.quantidadeAtual < 10 ? (
-                          <div className="text-xs text-red-600 font-medium mt-1">⚠️ Estoque baixo!</div>
-                        ) : null}
-                      </div>
-                    ))}
-                  </div>
-                </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 justify-items-center">
+          {state.camisetas.map(camiseta => (
+            <div 
+              key={camiseta.id} 
+              className={`stat-card border-2 w-full max-w-[140px] ${
+                camiseta.sexo === 'homem' 
+                  ? 'border-blue-200 bg-blue-50' 
+                  : 'border-pink-200 bg-pink-50'
+              } ${
+                camiseta.quantidadeAtual === 0 
+                  ? 'border-red-300 bg-red-100' 
+                  : camiseta.quantidadeAtual < 10 
+                  ? 'border-red-200 bg-red-50' 
+                  : ''
+              }`}
+            >
+                             {/* Header: SPONSOR */}
+               <div style={{ 
+                 fontSize: '0.75rem',
+                 fontWeight: '700',
+                 marginBottom: '0.5rem',
+                 textAlign: 'center',
+                 color: 'var(--text-primary)',
+                 lineHeight: '1.2',
+                 width: '100%'
+               }}>
+                 {camiseta.sponsor}
+               </div>
+               
+               {/* Badge: SEXO - TAMANHO */}
+               <div style={{ 
+                 display: 'flex', 
+                 justifyContent: 'center', 
+                 marginBottom: '0.5rem',
+                 width: '100%'
+               }}>
+                 <div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium" style={{
+                   backgroundColor: camiseta.sexo === 'homem' ? 'var(--primary-color)' : '#ec4899',
+                   color: 'white',
+                   border: `1px solid ${camiseta.sexo === 'homem' ? 'var(--primary-dark)' : '#be185d'}`,
+                   borderRadius: '10px',
+                   padding: '0.25rem 0.5rem',
+                   width: 'fit-content',
+                   minWidth: 'fit-content'
+                 }}>
+                   {camiseta.sexo === 'homem' ? '👨 Homem' : '👩 Mulher'} - {camiseta.tamanho}
+                 </div>
+               </div>
+              
+              {/* Quantidade */}
+              <div className="stat-value" style={{
+                color: camiseta.quantidadeAtual === 0 
+                  ? 'var(--danger-color)' 
+                  : camiseta.quantidadeAtual < 10 
+                  ? '#dc2626' 
+                  : camiseta.sexo === 'homem' ? 'var(--primary-color)' : '#be185d'
+              }}>
+                {camiseta.quantidadeAtual}
               </div>
+              
+              {/* Distribuído */}
+              <div className="text-xs" style={{ color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
+                Distribuído: {camiseta.quantidadeDistribuida}
+              </div>
+              
+              {/* Alertas de estoque */}
+              {camiseta.quantidadeAtual === 0 ? (
+                <div className="text-xs font-bold mt-1" style={{ color: 'var(--danger-color)' }}>🚫 Estoque acabou!</div>
+              ) : camiseta.quantidadeAtual < 10 ? (
+                <div className="text-xs font-medium mt-1" style={{ color: 'var(--warning-color)' }}>⚠️ Estoque baixo!</div>
+              ) : null}
             </div>
           ))}
         </div>
