@@ -22,6 +22,9 @@ export function CamisetasTab() {
   const [sexoDistribuir, setSexoDistribuir] = useState<'homem' | 'mulher'>('homem');
   const [quantidadeDistribuir, setQuantidadeDistribuir] = useState('');
   
+  // Estado para filtro de sponsor
+  const [sponsorFiltro, setSponsorFiltro] = useState('todos');
+  
   // Lista de sponsors disponíveis
   const sponsorsDisponiveis = ['Bugcrowd', 'Intigriti', 'HackerOne', 'BugHunt', 'PortSwigger'];
 
@@ -392,8 +395,62 @@ export function CamisetasTab() {
           <h3 className="card-title">📦 Estoque Atual por Tamanho, Sponsor e Sexo</h3>
           <p className="card-description">Visualização rápida de todas as quantidades disponíveis</p>
         </div>
+        
+        {/* Filtros de Sponsor */}
+        <div style={{ 
+          display: 'flex', 
+          flexWrap: 'wrap', 
+          gap: '0.5rem', 
+          marginBottom: '1rem',
+          justifyContent: 'center'
+        }}>
+          <button
+            onClick={() => setSponsorFiltro('todos')}
+                         style={{
+               padding: '0.5rem 1rem',
+               borderRadius: '20px',
+               border: 'none',
+               cursor: 'pointer',
+               fontSize: '0.875rem',
+               fontWeight: '600',
+               backgroundColor: sponsorFiltro === 'todos' ? 'var(--primary-color)' : 'var(--surface)',
+               color: sponsorFiltro === 'todos' ? 'white' : 'var(--text-primary)',
+               borderWidth: '2px',
+               borderStyle: 'solid',
+               borderColor: sponsorFiltro === 'todos' ? 'var(--primary-color)' : 'var(--border)',
+               transition: 'all 0.2s'
+             }}
+          >
+            Todos
+          </button>
+          {sponsorsDisponiveis.map(sponsor => (
+            <button
+              key={sponsor}
+              onClick={() => setSponsorFiltro(sponsor)}
+                           style={{
+               padding: '0.5rem 1rem',
+               borderRadius: '20px',
+               border: 'none',
+               cursor: 'pointer',
+               fontSize: '0.875rem',
+               fontWeight: '600',
+               backgroundColor: sponsorFiltro === sponsor ? 'var(--primary-color)' : 'var(--surface)',
+               color: sponsorFiltro === sponsor ? 'white' : 'var(--text-primary)',
+               borderWidth: '2px',
+               borderStyle: 'solid',
+               borderColor: sponsorFiltro === sponsor ? 'var(--primary-color)' : 'var(--border)',
+               transition: 'all 0.2s'
+             }}
+            >
+              {sponsor}
+            </button>
+          ))}
+        </div>
+        
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 justify-items-center">
-          {state.camisetas.map(camiseta => (
+          {state.camisetas
+            .filter(camiseta => sponsorFiltro === 'todos' || camiseta.sponsor === sponsorFiltro)
+            .map(camiseta => (
             <div 
               key={camiseta.id} 
               className={`stat-card border-2 w-full max-w-[140px] ${
@@ -410,15 +467,42 @@ export function CamisetasTab() {
             >
                              {/* Header: SPONSOR */}
                <div style={{ 
-                 fontSize: '0.75rem',
-                 fontWeight: '700',
                  marginBottom: '0.5rem',
                  textAlign: 'center',
-                 color: 'var(--text-primary)',
-                 lineHeight: '1.2',
                  width: '100%'
                }}>
-                 {camiseta.sponsor}
+                 {camiseta.sponsor === 'HackerOne' ? (
+                   <img 
+                     src="https://assets.streamlinehq.com/image/private/w_240,h_240,ar_1/f_auto/v1/icons/development/hackerone-cm4i0rtqkppti4oso76m1p.png/hackerone-7ocgai7dez46geovj3w7p4.png?_a=DATAg1AAZAA0"
+                     alt="HackerOne"
+                     style={{
+                       width: '32px',
+                       height: '32px',
+                       objectFit: 'contain',
+                       margin: '0 auto'
+                     }}
+                   />
+                 ) : camiseta.sponsor === 'Bugcrowd' ? (
+                   <img 
+                     src="https://www.bugcrowd.com/wp-content/uploads/2023/02/Press-Kit-Transparent-Hex-B.png"
+                     alt="Bugcrowd"
+                     style={{
+                       width: '32px',
+                       height: '32px',
+                       objectFit: 'contain',
+                       margin: '0 auto'
+                     }}
+                   />
+                 ) : (
+                   <div style={{
+                     fontSize: '0.75rem',
+                     fontWeight: '700',
+                     color: 'var(--text-primary)',
+                     lineHeight: '1.2'
+                   }}>
+                     {camiseta.sponsor}
+                   </div>
+                 )}
                </div>
                
                {/* Badge: SEXO - TAMANHO */}
