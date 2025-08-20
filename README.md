@@ -1,167 +1,144 @@
-# 🎁 App de Controle de Swags
+# 🎁 Swags Manager Pro
 
-Uma aplicação web responsiva para gerenciar o controle de camisetas e swags em eventos, com funcionalidades específicas para distribuição e rastreamento.
+**Sistema inteligente para controle de estoque de swags e camisetas em eventos de segurança e bug bounty.**
 
-## ✨ Funcionalidades
+## ✨ **Funcionalidades Principais**
 
-### 1. Controle de Camisetas
-- **Cadastro de quantidade inicial** por tamanho: PP, P, M, G, GG, XL, XXL e SPONSOR
-- **Interface para baixar manualmente** a quantidade diária distribuída
-- **Visualização rápida** do estoque restante por tamanho
-- **Controle de distribuições** com histórico automático
+### 👕 **Gestão de Camisetas**
+- **Controle por Tamanho + Sponsor**: Cada camiseta tem tamanho (PP, P, M, L, XL, XXL) e empresa sponsor
+- **Sponsors Suportados**: Bugcrowd, Intigriti, HackerOne, BugHunt, PortSwigger
+- **Adicionar Quantidade**: Soma ao estoque existente de combinações específicas
+- **Registrar Distribuição**: Controle de saída de camisetas para eventos
+- **Alertas Inteligentes**: 
+  - 🚫 **Estoque acabou** (quantidade = 0)
+  - ⚠️ **Estoque baixo** (quantidade < 10)
 
-### 2. Controle de Swags
-- **Cadastro de diferentes tipos** de swag (licenças, canecas, canetas, etc.)
-- **Distribuição inteligente**:
-  - Para **licenças**: obrigatório nome e email do ganhador
-  - Para outros itens: controle de quantidade
-- **Atualização automática** do estoque
+### 🎁 **Controle de Swags**
+- **Tipos Suportados**: Licenças, Canecas, Outros itens
+- **Swags Padrão**: Licença Caido, PentesterLab, HackTheBox, Caneca BBV, Coin BBV
+- **Gestão de Licenças**: Registro obrigatório de nome e email do ganhador
+- **Histórico Completo**: Rastreamento de todas as distribuições
+- **Exportação CSV**: Relatórios para análise e auditoria
 
-### 3. Histórico de Distribuições
-- **Rastreamento completo** de quem recebeu qual swag e quando
-- **Filtros por tipo e data**
-- **Exportação para CSV** para análise externa
-- **Estatísticas visuais** de distribuição
+## 🚀 **Tecnologias**
 
-## 🚀 Como Usar
+- **Frontend**: React 18 + TypeScript
+- **Estado**: Context API + useReducer
+- **Estilo**: CSS Custom Properties + Flexbox/Grid
+- **PWA**: Progressive Web App para mobile
+- **Storage**: LocalStorage para persistência offline
+- **Icons**: Lucide React
+- **Build**: Create React App
 
-### Instalação
+## 📱 **Design Responsivo**
 
-1. **Clone o repositório**:
+- **Mobile-First**: Otimizado para uso em eventos
+- **Sidebar Adaptativa**: Menu lateral que se ajusta ao tamanho da tela
+- **Interface Intuitiva**: Cards organizados e formulários claros
+- **Cores Semânticas**: Sistema de cores para diferentes estados
+
+## 🎯 **Casos de Uso**
+
+### **Eventos de Segurança**
+- Controle de camisetas por empresa sponsor
+- Gestão de swags para participantes
+- Rastreamento de distribuições
+- Relatórios de uso
+
+### **Bug Bounty Programs**
+- Controle de licenças premium
+- Gestão de itens promocionais
+- Histórico de ganhadores
+- Auditoria de distribuições
+
+## 🛠️ **Instalação e Uso**
+
+### **Requisitos**
+- Node.js 16+
+- npm ou yarn
+
+### **Setup**
 ```bash
-git clone <url-do-repositorio>
-cd swags-app
-```
+# Clone o repositório
+git clone [url-do-repo]
 
-2. **Instale as dependências**:
-```bash
+# Instale as dependências
 npm install
-```
 
-3. **Inicie a aplicação**:
-```bash
+# Execute em desenvolvimento
 npm start
+
+# Build para produção
+npm run build
 ```
 
-A aplicação estará disponível em `http://localhost:3000`
+### **Uso Rápido**
+1. **Acesse** o app no navegador
+2. **Clique** em "Demo Data" para carregar dados de exemplo
+3. **Navegue** entre as abas "Camisetas" e "Swags"
+4. **Gerencie** estoque e distribuições
 
-### Uso Diário
-
-#### Configuração Inicial de Camisetas
-1. Vá para a aba **Camisetas**
-2. Configure as quantidades iniciais para cada tamanho
-3. Clique em **"Salvar Quantidades"**
-
-#### Distribuição Diária de Camisetas
-1. Na aba **Camisetas**, use a seção "Registrar Distribuição Diária"
-2. Digite a quantidade que será levada para a sala
-3. Clique em **"Registrar Distribuição"**
-4. O sistema automaticamente subtrai do estoque
-
-#### Gerenciamento de Swags
-1. Vá para a aba **Swags**
-2. Clique em **"Novo Swag"** para adicionar itens
-3. Para distribuir, clique em **"Distribuir"** no item desejado
-4. Para licenças, preencha nome e email do ganhador
-
-#### Consulta de Histórico
-1. Use a aba **Histórico** para ver todas as distribuições
-2. Aplique filtros por tipo ou data
-3. Exporte dados para CSV quando necessário
-
-## 📱 Responsividade
-
-A aplicação é totalmente responsiva e funciona perfeitamente em:
-- ✅ Desktop
-- ✅ Tablet
-- ✅ Smartphone (iOS e Android)
-- ✅ Navegadores web móveis
-
-## 💾 Armazenamento
-
-Os dados são salvos automaticamente no **localStorage** do navegador, garantindo:
-- Persistência entre sessões
-- Funcionamento offline
-- Backup automático dos dados
-
-## 🎯 Casos de Uso
-
-### Cenário Típico de Evento
-1. **Sábado de manhã**: Configure quantidades de camisetas para levar
-2. **Durante o evento**: Registre distribuições conforme necessário
-3. **Se faltar camisetas**: Suba, busque mais e registre no app
-4. **Para swags**: Distribua e registre ganhadores (especialmente licenças)
-5. **Ao final**: Consulte histórico e exporte relatórios
-
-### Vantagens do Sistema
-- **Controle em tempo real** do estoque
-- **Rastreabilidade completa** de distribuições
-- **Interface intuitiva** para uso rápido
-- **Relatórios automáticos** para análise
-
-## 🛠️ Tecnologias Utilizadas
-
-- **React 18** com TypeScript
-- **Context API** para gerenciamento de estado
-- **CSS responsivo** com grid e flexbox
-- **Lucide React** para ícones
-- **Date-fns** para formatação de datas
-- **LocalStorage** para persistência de dados
-
-## 📋 Estrutura do Projeto
+## 📊 **Estrutura do Projeto**
 
 ```
 src/
-├── components/
-│   ├── CamisetasTab.tsx      # Controle de camisetas
-│   ├── SwagsTab.tsx          # Controle de swags
-│   ├── HistoricoTab.tsx      # Histórico e relatórios
-│   └── ui/
-│       └── Tabs.tsx          # Componente de abas
-├── context/
-│   └── AppContext.tsx        # Estado global da aplicação
-├── types/
-│   └── index.ts              # Definições TypeScript
-├── App.tsx                   # Componente principal
-└── index.tsx                 # Ponto de entrada
+├── components/          # Componentes React
+│   ├── CamisetasTab.tsx    # Gestão de camisetas
+│   ├── SwagsTab.tsx        # Controle de swags
+│   └── Sidebar.tsx         # Menu lateral
+├── context/            # Estado global
+│   └── AppContext.tsx      # Context API
+├── data/               # Dados de exemplo
+│   └── sampleData.ts       # Swags e camisetas padrão
+├── types/              # Definições TypeScript
+│   └── index.ts            # Interfaces e tipos
+└── index.css           # Sistema de design
 ```
 
-## 🔧 Personalização
+## 🔧 **Configuração**
 
-### Adicionar Novos Tipos de Swag
-Edite o arquivo `src/types/index.ts` e adicione novos tipos na interface `Swag`.
+### **Sponsors Personalizados**
+Edite `src/components/CamisetasTab.tsx`:
+```typescript
+const sponsorsDisponiveis = [
+  'Bugcrowd', 'Intigriti', 'HackerOne', 
+  'BugHunt', 'PortSwigger'
+];
+```
 
-### Modificar Tamanhos de Camiseta
-Edite o array de tamanhos no `AppContext.tsx` para incluir novos tamanhos.
+### **Novos Swags**
+Adicione em `src/data/sampleData.ts`:
+```typescript
+export const sampleSwags: Swag[] = [
+  // Seus novos swags aqui
+];
+```
 
-### Alterar Estilos
-Modifique o arquivo `src/index.css` para personalizar cores, fontes e layout.
+## 📈 **Roadmap**
 
-## 🚨 Solução de Problemas
+- [ ] **Backend Integration**: API REST para persistência
+- [ ] **Multi-User**: Sistema de usuários e permissões
+- [ ] **Analytics**: Dashboards e relatórios avançados
+- [ ] **QR Code**: Sistema de distribuição por QR
+- [ ] **Notifications**: Alertas em tempo real
+- [ ] **Backup**: Exportação/importação de dados
 
-### Dados não persistem
-- Verifique se o localStorage está habilitado no navegador
-- Limpe o cache do navegador se necessário
+## 🤝 **Contribuição**
 
-### Aplicação não carrega
-- Verifique se todas as dependências foram instaladas
-- Execute `npm install` novamente
+1. **Fork** o projeto
+2. **Crie** uma branch para sua feature
+3. **Commit** suas mudanças
+4. **Push** para a branch
+5. **Abra** um Pull Request
 
-### Problemas de responsividade
-- Teste em diferentes dispositivos
-- Verifique se o viewport está configurado corretamente
+## 📄 **Licença**
 
-## 📞 Suporte
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
-Para dúvidas ou sugestões:
-1. Abra uma issue no repositório
-2. Descreva o problema ou funcionalidade desejada
-3. Inclua screenshots se relevante
+## 👨‍💻 **Autor**
 
-## 📄 Licença
-
-Este projeto é de uso livre para fins educacionais e comerciais.
+**Felipe Caon** - Desenvolvedor de Segurança
 
 ---
 
-**Desenvolvido com ❤️ para facilitar o controle de swags em eventos**
+⭐ **Se este projeto te ajudou, considere dar uma estrela!**
