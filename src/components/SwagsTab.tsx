@@ -7,7 +7,9 @@ export function SwagsTab() {
   const { state, dispatch } = useApp();
   const [showAddSwag, setShowAddSwag] = useState(false);
   const [showDistribuicao, setShowDistribuicao] = useState(false);
+  const [showEditDistribuicao, setShowEditDistribuicao] = useState(false);
   const [selectedSwag, setSelectedSwag] = useState<Swag | null>(null);
+  const [selectedDistribuicao, setSelectedDistribuicao] = useState<Distribuicao | null>(null);
   
   // Formulário de novo swag
   const [novoSwag, setNovoSwag] = useState({
@@ -19,6 +21,12 @@ export function SwagsTab() {
   // Formulário de distribuição
   const [distribuicao, setDistribuicao] = useState({
     quantidade: 1,
+    nomeGanhador: '',
+    emailGanhador: ''
+  });
+
+  // Formulário de edição de distribuição
+  const [editDistribuicao, setEditDistribuicao] = useState({
     nomeGanhador: '',
     emailGanhador: ''
   });
@@ -109,10 +117,83 @@ export function SwagsTab() {
     setShowDistribuicao(true);
   };
 
+  const openEditDistribuicao = (distribuicao: Distribuicao) => {
+    setSelectedDistribuicao(distribuicao);
+    setEditDistribuicao({
+      nomeGanhador: distribuicao.nomeGanhador || '',
+      emailGanhador: distribuicao.emailGanhador || ''
+    });
+    setShowEditDistribuicao(true);
+  };
+
+  const handleEditDistribuicao = () => {
+    if (!selectedDistribuicao) return;
+
+    // Atualizar a distribuição
+    const distribuicaoAtualizada: Distribuicao = {
+      ...selectedDistribuicao,
+      nomeGanhador: editDistribuicao.nomeGanhador || undefined,
+      emailGanhador: editDistribuicao.emailGanhador || undefined
+    };
+
+    // Atualizar no estado global
+    const distribuicoesAtualizadas = state.distribuicoes.map(d => 
+      d.id === selectedDistribuicao.id ? distribuicaoAtualizada : d
+    );
+
+    dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoesAtualizadas });
+
+    // Salvar no localStorage
+    localStorage.setItem('distribuicoes', JSON.stringify(distribuicoesAtualizadas));
+
+    // Limpar e fechar
+    setEditDistribuicao({ nomeGanhador: '', emailGanhador: '' });
+    setSelectedDistribuicao(null);
+    setShowEditDistribuicao(false);
+
+    alert('Distribuição editada com sucesso!');
+  };
+
+  const handleDeleteDistribuicao = (distribuicao: Distribuicao) => {
+    if (!window.confirm(`Tem certeza que deseja deletar a distribuição de "${distribuicao.swagNome}"?`)) {
+      return;
+    }
+
+    // Encontrar o swag correspondente
+    const swag = state.swags.find(s => s.id === distribuicao.swagId);
+    if (!swag) return;
+
+    // Devolver quantidade ao estoque
+    const swagAtualizado: Swag = {
+      ...swag,
+      quantidadeAtual: swag.quantidadeAtual + distribuicao.quantidade,
+      quantidadeDistribuida: swag.quantidadeDistribuida - distribuicao.quantidade
+    };
+
+    // Atualizar swags
+    const swagsAtualizados = state.swags.map(s => 
+      s.id === swag.id ? swagAtualizado : s
+    );
+
+    // Remover distribuição
+    const distribuicoesAtualizadas = state.distribuicoes.filter(d => 
+      d.id !== distribuicao.id
+    );
+
+    // Atualizar estado global
+    dispatch({ type: 'SET_SWAGS', payload: swagsAtualizados });
+    dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoesAtualizadas });
+
+    // Salvar no localStorage
+    localStorage.setItem('swags', JSON.stringify(swagsAtualizados));
+    localStorage.setItem('distribuicoes', JSON.stringify(distribuicoesAtualizadas));
+
+    alert(`Distribuição deletada! ${distribuicao.quantidade} unidade(s) devolvida(s) ao estoque.`);
+  };
+
   const getTipoLabel = (tipo: string) => {
     const labels = {
       LICENCA: 'Licença',
-      CANECA: 'Caneca',
       OUTRO: 'Outro'
     };
     return labels[tipo as keyof typeof labels] || tipo;
@@ -121,7 +202,6 @@ export function SwagsTab() {
   const getTipoColor = (tipo: string) => {
     const colors = {
       LICENCA: 'badge-success',
-      CANECA: 'badge-warning',
       OUTRO: 'badge-secondary'
     };
     return colors[tipo as keyof typeof colors] || 'badge-secondary';
@@ -201,56 +281,83 @@ export function SwagsTab() {
             <p className="card-description">Registro de todas as distribuições realizadas</p>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>Data</th>
-                  <th>Swag</th>
-                  <th>Tipo</th>
-                  <th>Quantidade</th>
-                  <th>Ganhador</th>
-                  <th>Email</th>
-                </tr>
-              </thead>
-              <tbody>
-                {state.distribuicoes
-                  .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
-                  .map(distribuicao => (
-                    <tr key={distribuicao.id}>
-                      <td className="font-medium" data-label="Data">
-                        {new Date(distribuicao.data).toLocaleDateString('pt-BR')}
-                      </td>
-                      <td className="font-medium" data-label="Swag">
-                        {distribuicao.swagNome}
-                      </td>
-                      <td data-label="Tipo">
-                        <span className={`badge ${getTipoColor(distribuicao.swagTipo)}`}>
-                          {getTipoLabel(distribuicao.swagTipo)}
-                        </span>
-                      </td>
-                      <td className="font-medium" data-label="Quantidade">
-                        {distribuicao.quantidade}
-                      </td>
-                      <td data-label="Ganhador">
-                        {distribuicao.nomeGanhador ? (
-                          <span className="font-medium text-green-600">{distribuicao.nomeGanhador}</span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td data-label="Email">
-                        {distribuicao.emailGanhador ? (
-                          <span className="font-medium text-blue-600">{distribuicao.emailGanhador}</span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
+                                <div className="overflow-x-auto">
+                        <table className="table">
+                          <thead>
+                            <tr>
+                              <th>Data</th>
+                              <th>Swag</th>
+                              <th>Tipo</th>
+                              <th>Quantidade</th>
+                              <th>Ganhador</th>
+                              <th>Email</th>
+                              <th>Ações</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {state.distribuicoes
+                              .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
+                              .map(distribuicao => (
+                                <tr key={distribuicao.id}>
+                                  <td className="font-medium" data-label="Data">
+                                    {new Date(distribuicao.data).toLocaleDateString('pt-BR')}
+                                  </td>
+                                  <td className="font-medium" data-label="Swag">
+                                    {distribuicao.swagNome}
+                                  </td>
+                                  <td data-label="Tipo">
+                                    <span className={`badge ${getTipoColor(distribuicao.swagTipo)}`}>
+                                      {getTipoLabel(distribuicao.swagTipo)}
+                                    </span>
+                                  </td>
+                                  <td className="font-medium" data-label="Quantidade">
+                                    {distribuicao.quantidade}
+                                  </td>
+                                  <td data-label="Ganhador">
+                                    {distribuicao.nomeGanhador ? (
+                                      <span className="font-medium text-green-600">{distribuicao.nomeGanhador}</span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                  <td data-label="Email">
+                                    {distribuicao.emailGanhador ? (
+                                      <span className="font-medium text-blue-600">{distribuicao.emailGanhador}</span>
+                                    ) : (
+                                      <span className="text-gray-400">-</span>
+                                    )}
+                                  </td>
+                                  <td data-label="Ações">
+                                    {distribuicao.swagTipo === 'LICENCA' && (
+                                      <div className="flex items-center justify-center gap-2 py-1">
+                                        <button
+                                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600 text-white text-xs font-medium shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-1"
+                                          onClick={() => openEditDistribuicao(distribuicao)}
+                                          title="Editar distribuição"
+                                        >
+                                          <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                          </svg>
+                                          Editar
+                                        </button>
+                                        <button
+                                          className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gradient-to-r from-red-400 to-red-500 hover:from-red-500 hover:to-red-600 text-white text-xs font-medium shadow-sm hover:shadow-md transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-1"
+                                          onClick={() => handleDeleteDistribuicao(distribuicao)}
+                                          title="Deletar distribuição"
+                                        >
+                                          <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                          </svg>
+                                          Deletar
+                                        </button>
+                                      </div>
+                                    )}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
           
           <div className="card-footer">
             <button
@@ -318,8 +425,6 @@ export function SwagsTab() {
                 onChange={(e) => setNovoSwag(prev => ({ ...prev, tipo: e.target.value as any }))}
               >
                 <option value="LICENCA">Licença</option>
-                <option value="CANECA">Caneca</option>
-
                 <option value="OUTRO">Outro</option>
               </select>
             </div>
@@ -420,6 +525,68 @@ export function SwagsTab() {
                 onClick={handleDistribuicao}
               >
                 Confirmar Distribuição
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Edição de Distribuição */}
+      {showEditDistribuicao && selectedDistribuicao && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h3 className="text-lg font-bold">✏️ Editar Distribuição - {selectedDistribuicao.swagNome}</h3>
+              <button
+                className="modal-close"
+                onClick={() => {
+                  setShowEditDistribuicao(false);
+                  setSelectedDistribuicao(null);
+                  setEditDistribuicao({ nomeGanhador: '', emailGanhador: '' });
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Nome do Ganhador</label>
+              <input
+                type="text"
+                className="form-input"
+                value={editDistribuicao.nomeGanhador}
+                onChange={(e) => setEditDistribuicao(prev => ({ ...prev, nomeGanhador: e.target.value }))}
+                placeholder="Nome completo"
+              />
+            </div>
+            
+            <div className="form-group">
+              <label className="form-label">Email do Ganhador</label>
+              <input
+                type="email"
+                className="form-input"
+                value={editDistribuicao.emailGanhador}
+                onChange={(e) => setEditDistribuicao(prev => ({ ...prev, emailGanhador: e.target.value }))}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                className="btn btn-secondary flex-1"
+                onClick={() => {
+                  setShowEditDistribuicao(false);
+                  setSelectedDistribuicao(null);
+                  setEditDistribuicao({ nomeGanhador: '', emailGanhador: '' });
+                }}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-success flex-1"
+                onClick={handleEditDistribuicao}
+              >
+                Salvar Alterações
               </button>
             </div>
           </div>

@@ -16,6 +16,7 @@ type AppAction =
   | { type: 'ADD_SWAG'; payload: Swag }
   | { type: 'UPDATE_SWAG'; payload: { id: string; quantidade: number } }
   | { type: 'ADD_DISTRIBUICAO'; payload: Distribuicao }
+  | { type: 'SET_DISTRIBUICOES'; payload: Distribuicao[] }
   | { type: 'INITIALIZE_DATA' }
   | { type: 'LOAD_SAMPLE_DATA' };
 
@@ -63,6 +64,9 @@ function appReducer(state: AppState, action: AppAction): AppState {
     
     case 'ADD_DISTRIBUICAO':
       return { ...state, distribuicoes: [...state.distribuicoes, action.payload] };
+    
+    case 'SET_DISTRIBUICOES':
+      return { ...state, distribuicoes: action.payload };
     
     case 'INITIALIZE_DATA':
       const tamanhos: TamanhoCamiseta[] = ['PP', 'P', 'M', 'L', 'XL', 'XXL'];

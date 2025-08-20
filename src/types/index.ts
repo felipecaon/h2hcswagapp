@@ -20,7 +20,7 @@ export interface Camiseta {
 export interface Swag {
   id: string;
   nome: string;
-  tipo: 'LICENCA' | 'CANECA' | 'OUTRO';
+  tipo: 'LICENCA' | 'OUTRO';
   quantidadeInicial: number;
   quantidadeAtual: number;
   quantidadeDistribuida: number;
