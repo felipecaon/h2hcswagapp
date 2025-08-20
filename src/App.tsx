@@ -14,31 +14,25 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // Inicializar dados ao carregar a aplicação
-    dispatch({ type: 'INITIALIZE_DATA' });
-    
-    // Carregar dados salvos no localStorage
+    // Carregar dados salvos no localStorage primeiro
     const savedCamisetas = localStorage.getItem('camisetas');
     const savedSwags = localStorage.getItem('swags');
     const savedDistribuicoes = localStorage.getItem('distribuicoes');
     
-    if (savedCamisetas) {
+    if (savedCamisetas && savedSwags) {
+      // Se há dados salvos, carregar eles
       dispatch({ type: 'SET_CAMISETAS', payload: JSON.parse(savedCamisetas) });
-    }
-    if (savedSwags) {
       dispatch({ type: 'SET_SWAGS', payload: JSON.parse(savedSwags) });
-    }
-    if (savedDistribuicoes) {
-      const distribuicoes = JSON.parse(savedDistribuicoes).map((d: any) => ({
-        ...d,
-        data: new Date(d.data)
-      }));
-      dispatch({ type: 'ADD_DISTRIBUICAO', payload: distribuicoes[0] });
-      if (distribuicoes.length > 1) {
-        distribuicoes.slice(1).forEach((d: any) => {
-          dispatch({ type: 'ADD_DISTRIBUICAO', payload: d });
-        });
+      if (savedDistribuicoes) {
+        const distribuicoes = JSON.parse(savedDistribuicoes).map((d: any) => ({
+          ...d,
+          data: new Date(d.data)
+        }));
+        dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoes });
       }
+    } else {
+      // Se não há dados salvos, inicializar com dados padrão
+      dispatch({ type: 'INITIALIZE_DATA' });
     }
   }, [dispatch]);
 
@@ -102,7 +96,7 @@ function AppContent() {
               </button>
               <div className="header-title">
                 <Sparkles className="w-6 h-6 text-blue-600" />
-                Swags Manager Pro
+                BBV Swag 
               </div>
             </div>
             

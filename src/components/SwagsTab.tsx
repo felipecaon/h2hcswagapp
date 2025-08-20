@@ -101,7 +101,7 @@ export function SwagsTab() {
     
     // Salvar no localStorage
     localStorage.setItem('swags', JSON.stringify(swagsAtualizados));
-    localStorage.setItem('distribuicoes', JSON.stringify([...state.distribuicoes, novaDistribuicao]));
+    localStorage.setItem('distribuicoes', JSON.stringify([...(state.distribuicoes || []), novaDistribuicao]));
     
     // Limpar formulário
     setDistribuicao({ quantidade: 1, nomeGanhador: '', emailGanhador: '' });
@@ -137,7 +137,7 @@ export function SwagsTab() {
     };
 
     // Atualizar no estado global
-    const distribuicoesAtualizadas = state.distribuicoes.map(d => 
+    const distribuicoesAtualizadas = (state.distribuicoes || []).map(d => 
       d.id === selectedDistribuicao.id ? distribuicaoAtualizada : d
     );
 
@@ -176,7 +176,7 @@ export function SwagsTab() {
     );
 
     // Remover distribuição
-    const distribuicoesAtualizadas = state.distribuicoes.filter(d => 
+    const distribuicoesAtualizadas = (state.distribuicoes || []).filter(d => 
       d.id !== distribuicao.id
     );
 
@@ -274,7 +274,7 @@ export function SwagsTab() {
       </div>
 
       {/* Histórico de Distribuições de Swags */}
-      {state.distribuicoes.length > 0 && (
+              {(state.distribuicoes || []).length > 0 && (
         <div className="card mt-6">
           <div className="card-header">
             <h3 className="card-title">📋 Histórico de Distribuições de Swags</h3>
@@ -295,7 +295,7 @@ export function SwagsTab() {
                             </tr>
                           </thead>
                           <tbody>
-                            {state.distribuicoes
+                            {(state.distribuicoes || [])
                               .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())
                               .map(distribuicao => (
                                 <tr key={distribuicao.id}>
@@ -407,7 +407,7 @@ export function SwagsTab() {
                 // Exportar para CSV
                 const csvContent = [
                   ['Data', 'Swag', 'Tipo', 'Quantidade', 'Ganhador', 'Email'],
-                  ...state.distribuicoes.map(d => [
+                  ...(state.distribuicoes || []).map(d => [
                     new Date(d.data).toLocaleDateString('pt-BR'),
                     d.swagNome,
                     getTipoLabel(d.swagTipo),

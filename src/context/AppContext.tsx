@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Camiseta, Swag, Distribuicao, TamanhoCamiseta } from '../types';
+import { Camiseta, Swag, Distribuicao, TamanhoCamiseta, SexoCamiseta } from '../types';
 import { sampleCamisetas, sampleSwags, sampleDistribuicoes } from '../data/sampleData';
 
 interface AppState {
@@ -71,18 +71,22 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'INITIALIZE_DATA':
       const tamanhos: TamanhoCamiseta[] = ['PP', 'P', 'M', 'L', 'XL', 'XXL'];
       const sponsors = ['Bugcrowd', 'Intigriti', 'HackerOne'];
+      const sexos: SexoCamiseta[] = ['homem', 'mulher'];
       
-      // Criar combinações de tamanho + sponsor
+      // Criar combinações de tamanho + sponsor + sexo
       const camisetasIniciais: Camiseta[] = [];
       tamanhos.forEach(tamanho => {
         sponsors.forEach(sponsor => {
-          camisetasIniciais.push({
-            id: `${tamanho}-${sponsor.toLowerCase()}`,
-            tamanho,
-            sponsor,
-            quantidadeInicial: 0,
-            quantidadeAtual: 0,
-            quantidadeDistribuida: 0
+          sexos.forEach(sexo => {
+            camisetasIniciais.push({
+              id: `${tamanho}-${sponsor.toLowerCase()}-${sexo}`,
+              tamanho,
+              sponsor,
+              sexo,
+              quantidadeInicial: 0,
+              quantidadeAtual: 0,
+              quantidadeDistribuida: 0
+            });
           });
         });
       });

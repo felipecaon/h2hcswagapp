@@ -13,11 +13,13 @@ export function CamisetasTab() {
   // Estados para adicionar quantidade a combinações existentes
   const [sponsorAdicionar, setSponsorAdicionar] = useState('Bugcrowd');
   const [tamanhoAdicionar, setTamanhoAdicionar] = useState<TamanhoCamiseta>('M');
+  const [sexoAdicionar, setSexoAdicionar] = useState<'homem' | 'mulher'>('homem');
   const [quantidadeAdicionar, setQuantidadeAdicionar] = useState('');
   
   // Estados para registrar distribuição
   const [sponsorDistribuir, setSponsorDistribuir] = useState('Bugcrowd');
   const [tamanhoDistribuir, setTamanhoDistribuir] = useState<TamanhoCamiseta>('M');
+  const [sexoDistribuir, setSexoDistribuir] = useState<'homem' | 'mulher'>('homem');
   const [quantidadeDistribuir, setQuantidadeDistribuir] = useState('');
   
   // Lista de sponsors disponíveis
@@ -74,11 +76,11 @@ export function CamisetasTab() {
   const registrarDistribuicao = () => {
     // Encontrar a camiseta específica
     const camiseta = state.camisetas.find(
-      c => c.tamanho === tamanhoDistribuir && c.sponsor === sponsorDistribuir
+      c => c.tamanho === tamanhoDistribuir && c.sponsor === sponsorDistribuir && c.sexo === sexoDistribuir
     );
     
     if (!camiseta) {
-      alert('Essa combinação de tamanho e sponsor não existe! Crie primeiro uma combinação.');
+      alert('Essa combinação de tamanho, sponsor e sexo não existe! Crie primeiro uma combinação.');
       return;
     }
     
@@ -116,7 +118,7 @@ export function CamisetasTab() {
 
   const totalDistribuido = Object.values(quantidadesDistribuidas).reduce((sum, qty) => sum + qty, 0);
 
-  // Função para adicionar quantidade a combinação existente
+  // Função para adicionar quantidade a combinação existente ou criar nova
   const adicionarQuantidade = () => {
     if (!sponsorAdicionar.trim()) {
       alert('Por favor, selecione um sponsor');
@@ -131,26 +133,42 @@ export function CamisetasTab() {
     
     // Verificar se existe essa combinação
     const camisetaExistente = state.camisetas.find(
-      c => c.tamanho === tamanhoAdicionar && c.sponsor === sponsorAdicionar
+      c => c.tamanho === tamanhoAdicionar && c.sponsor === sponsorAdicionar && c.sexo === sexoAdicionar
     );
     
-    if (!camisetaExistente) {
-      alert('Essa combinação de tamanho e sponsor não existe! Crie primeiro uma combinação.');
-      return;
+    let camisetasAtualizadas: Camiseta[];
+    
+    if (camisetaExistente) {
+      // Atualizar a camiseta existente
+      const camisetaAtualizada: Camiseta = {
+        ...camisetaExistente,
+        quantidadeInicial: camisetaExistente.quantidadeInicial + quantidade,
+        quantidadeAtual: camisetaExistente.quantidadeAtual + quantidade
+      };
+      
+      camisetasAtualizadas = state.camisetas.map(c => 
+        c.id === camisetaExistente.id ? camisetaAtualizada : c
+      );
+      
+      alert(`Quantidade adicionada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar} para ${sexoAdicionar}`);
+    } else {
+      // Criar uma nova combinação
+      const novaCamiseta: Camiseta = {
+        id: `${tamanhoAdicionar}-${sponsorAdicionar.toLowerCase()}-${sexoAdicionar}`,
+        tamanho: tamanhoAdicionar,
+        sponsor: sponsorAdicionar,
+        sexo: sexoAdicionar,
+        quantidadeInicial: quantidade,
+        quantidadeAtual: quantidade,
+        quantidadeDistribuida: 0
+      };
+      
+      camisetasAtualizadas = [...state.camisetas, novaCamiseta];
+      
+      alert(`Nova combinação criada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar} para ${sexoAdicionar}`);
     }
     
-    // Atualizar a camiseta existente
-    const camisetaAtualizada: Camiseta = {
-      ...camisetaExistente,
-      quantidadeInicial: camisetaExistente.quantidadeInicial + quantidade,
-      quantidadeAtual: camisetaExistente.quantidadeAtual + quantidade
-    };
-    
     // Atualizar no estado
-    const camisetasAtualizadas = state.camisetas.map(c => 
-      c.id === camisetaExistente.id ? camisetaAtualizada : c
-    );
-    
     dispatch({ type: 'SET_CAMISETAS', payload: camisetasAtualizadas });
     
     // Salvar no localStorage
@@ -158,8 +176,6 @@ export function CamisetasTab() {
     
     // Limpar formulário
     setQuantidadeAdicionar('');
-    
-    alert(`Quantidade adicionada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar}`);
   };
 
   // Agrupar camisetas por sponsor para exibição
@@ -179,20 +195,20 @@ export function CamisetasTab() {
       <div className="card">
         <div className="card-header">
           <h3 className="card-title">👕 Gestão de Camisetas</h3>
-          <p className="card-description">Configure quantidades e registre distribuições por tamanho e sponsor</p>
+          <p className="card-description">Configure quantidades e registre distribuições por tamanho, sponsor e sexo</p>
         </div>
 
         {/* Formulários de Gestão */}
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           {/* Adicionar Quantidade a Combinação Existente */}
           <div className="card">
             <div className="card-header">
-              <h4 className="card-title">➕ Adicionar Quantidade</h4>
-              <p className="card-description">Adicione mais camisetas a uma combinação existente de tamanho e sponsor</p>
+              <h4 className="card-title text-lg sm:text-xl">➕ Adicionar Quantidade</h4>
+              <p className="card-description text-sm sm:text-base">Adicione mais camisetas a uma combinação existente de tamanho, sponsor e sexo</p>
             </div>
             
-            <div className="p-6">
-              <div className="grid grid-3 gap-4">
+            <div className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sponsor
@@ -220,6 +236,20 @@ export function CamisetasTab() {
                     {tamanhos.map(tamanho => (
                       <option key={tamanho} value={tamanho}>{tamanho}</option>
                     ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sexo
+                  </label>
+                  <select
+                    className="form-select w-full"
+                    value={sexoAdicionar}
+                    onChange={(e) => setSexoAdicionar(e.target.value as 'homem' | 'mulher')}
+                  >
+                    <option value="homem">Homem</option>
+                    <option value="mulher">Mulher</option>
                   </select>
                 </div>
                 
@@ -266,12 +296,12 @@ export function CamisetasTab() {
           {/* Registro de Distribuição */}
           <div className="card">
             <div className="card-header">
-              <h4 className="card-title">📤 Registrar Distribuição para Evento</h4>
-              <p className="card-description">Selecione o sponsor, tamanho e quantidade para distribuir</p>
+              <h4 className="card-title text-lg sm:text-xl">📤 Registrar Distribuição para Evento</h4>
+              <p className="card-description text-sm sm:text-base">Selecione o sponsor, tamanho, sexo e quantidade para distribuir</p>
             </div>
             
-            <div className="p-6">
-              <div className="grid grid-3 gap-4">
+            <div className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Sponsor
@@ -299,6 +329,20 @@ export function CamisetasTab() {
                     {tamanhos.map(tamanho => (
                       <option key={tamanho} value={tamanho}>{tamanho}</option>
                     ))}
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Sexo
+                  </label>
+                  <select
+                    className="form-select w-full"
+                    value={sexoDistribuir}
+                    onChange={(e) => setSexoDistribuir(e.target.value as 'homem' | 'mulher')}
+                  >
+                    <option value="homem">Homem</option>
+                    <option value="mulher">Mulher</option>
                   </select>
                 </div>
                 
@@ -345,48 +389,98 @@ export function CamisetasTab() {
       {/* Estoque Atual */}
       <div className="card">
         <div className="card-header">
-          <h3 className="card-title">📦 Estoque Atual por Tamanho e Sponsor</h3>
+          <h3 className="card-title">📦 Estoque Atual por Tamanho, Sponsor e Sexo</h3>
           <p className="card-description">Visualização rápida de todas as quantidades disponíveis</p>
         </div>
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {Object.entries(camisetasPorSponsor).map(([sponsor, camisetas]) => (
-            <div key={sponsor} className="border border-gray-200 rounded-lg p-4">
-              <h4 className="font-semibold text-gray-700 mb-4 text-center flex items-center justify-center gap-2">
+            <div key={sponsor} className="border border-gray-200 rounded-lg p-3 sm:p-4">
+              <h4 className="font-semibold text-gray-700 mb-3 sm:mb-4 text-center flex items-center justify-center gap-2">
                 <Building2 size={16} />
                 {sponsor}
               </h4>
-              <div className="grid grid-4">
-                {camisetas.map(camiseta => (
-                  <div 
-                    key={camiseta.id} 
-                    className={`stat-card ${
-                      camiseta.quantidadeAtual === 0 
-                        ? 'border-red-300 bg-red-100' 
-                        : camiseta.quantidadeAtual < 10 
-                        ? 'border-red-200 bg-red-50' 
-                        : ''
-                    }`}
-                  >
-                    <div className={`stat-value ${
-                      camiseta.quantidadeAtual === 0 
-                        ? 'text-red-700' 
-                        : camiseta.quantidadeAtual < 10 
-                        ? 'text-red-600' 
-                        : ''
-                    }`}>
-                      {camiseta.quantidadeAtual}
-                    </div>
-                    <div className="stat-label">{camiseta.tamanho}</div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      Distribuído: {camiseta.quantidadeDistribuida}
-                    </div>
-                    {camiseta.quantidadeAtual === 0 ? (
-                      <div className="text-xs text-red-700 font-bold mt-1">🚫 Estoque acabou!</div>
-                    ) : camiseta.quantidadeAtual < 10 ? (
-                      <div className="text-xs text-red-600 font-medium mt-1">⚠️ Estoque baixo!</div>
-                    ) : null}
+              <div className="space-y-4 sm:space-y-6">
+                {/* Camisetas para Homens */}
+                <div>
+                  <h5 className="text-sm font-medium text-blue-600 text-center mb-2 sm:mb-3">👨 Homens</h5>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 justify-items-center">
+                    {camisetas.filter(c => c.sexo === 'homem').map(camiseta => (
+                      <div 
+                        key={camiseta.id} 
+                        className={`stat-card border-2 border-blue-200 bg-blue-50 w-full max-w-[120px] ${
+                          camiseta.quantidadeAtual === 0 
+                            ? 'border-red-300 bg-red-100' 
+                            : camiseta.quantidadeAtual < 10 
+                            ? 'border-red-200 bg-red-50' 
+                            : ''
+                        }`}
+                      >
+                        <div className={`stat-value ${
+                          camiseta.quantidadeAtual === 0 
+                            ? 'text-red-700' 
+                            : camiseta.quantidadeAtual < 10 
+                            ? 'text-red-600' 
+                            : 'text-blue-700'
+                        }`}>
+                          {camiseta.quantidadeAtual}
+                        </div>
+                        <div className="stat-label text-blue-800">{camiseta.tamanho}</div>
+                        <div className="text-xs text-blue-600 mt-1 font-medium">
+                          👨 Homem
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Distribuído: {camiseta.quantidadeDistribuida}
+                        </div>
+                        {camiseta.quantidadeAtual === 0 ? (
+                          <div className="text-xs text-red-700 font-bold mt-1">🚫 Estoque acabou!</div>
+                        ) : camiseta.quantidadeAtual < 10 ? (
+                          <div className="text-xs text-red-600 font-medium mt-1">⚠️ Estoque baixo!</div>
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                {/* Camisetas para Mulheres */}
+                <div>
+                  <h5 className="text-sm font-medium text-pink-600 text-center mb-2 sm:mb-3">👩 Mulheres</h5>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3 justify-items-center">
+                    {camisetas.filter(c => c.sexo === 'mulher').map(camiseta => (
+                      <div 
+                        key={camiseta.id} 
+                        className={`stat-card border-2 border-pink-200 bg-pink-50 w-full max-w-[120px] ${
+                          camiseta.quantidadeAtual === 0 
+                            ? 'border-red-300 bg-red-100' 
+                            : camiseta.quantidadeAtual < 10 
+                            ? 'border-red-200 bg-red-50' 
+                            : ''
+                        }`}
+                      >
+                        <div className={`stat-value ${
+                          camiseta.quantidadeAtual === 0 
+                            ? 'text-red-700' 
+                            : camiseta.quantidadeAtual < 10 
+                            ? 'text-red-600' 
+                            : 'text-pink-700'
+                        }`}>
+                          {camiseta.quantidadeAtual}
+                        </div>
+                        <div className="stat-label text-pink-800">{camiseta.tamanho}</div>
+                        <div className="text-xs text-pink-600 mt-1 font-medium">
+                          👩 Mulher
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                          Distribuído: {camiseta.quantidadeDistribuida}
+                        </div>
+                        {camiseta.quantidadeAtual === 0 ? (
+                          <div className="text-xs text-red-700 font-bold mt-1">🚫 Estoque acabou!</div>
+                        ) : camiseta.quantidadeAtual < 10 ? (
+                          <div className="text-xs text-red-600 font-medium mt-1">⚠️ Estoque baixo!</div>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ))}

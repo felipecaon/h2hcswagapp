@@ -1,17 +1,11 @@
 export type TamanhoCamiseta = 'PP' | 'P' | 'M' | 'L' | 'XL' | 'XXL';
+export type SexoCamiseta = 'homem' | 'mulher';
 
 export interface Camiseta {
   id: string;
   tamanho: TamanhoCamiseta;
   sponsor: string;
-  quantidadeInicial: number;
-  quantidadeAtual: number;
-  quantidadeDistribuida: number;
-}
-
-export interface Camiseta {
-  id: string;
-  tamanho: TamanhoCamiseta;
+  sexo: SexoCamiseta;
   quantidadeInicial: number;
   quantidadeAtual: number;
   quantidadeDistribuida: number;

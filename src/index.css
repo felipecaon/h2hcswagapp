@@ -437,12 +437,23 @@ code {
 .stat-card {
   background: var(--surface);
   border-radius: var(--radius-lg);
-  padding: 1.5rem;
+  padding: 1rem;
   text-align: center;
   border: 1px solid var(--border-light);
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .stat-card {
+    padding: 1.5rem;
+    min-height: 140px;
+  }
 }
 
 .stat-card::before {
@@ -461,7 +472,7 @@ code {
 }
 
 .stat-value {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
   background: linear-gradient(135deg, var(--primary-color), var(--success-color));
@@ -470,10 +481,22 @@ code {
   background-clip: text;
 }
 
+@media (min-width: 640px) {
+  .stat-value {
+    font-size: 2.5rem;
+  }
+}
+
 .stat-label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .stat-label {
+    font-size: 0.875rem;
+  }
 }
 
 .stat-change {
