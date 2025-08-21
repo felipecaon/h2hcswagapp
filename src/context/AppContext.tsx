@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Camiseta, Swag, Distribuicao, TamanhoCamiseta, SexoCamiseta } from '../types';
-import { sampleCamisetas, sampleSwags, sampleDistribuicoes } from '../data/sampleData';
 import { Sponsor } from '../services/firestore';
 
 interface AppState {
@@ -23,8 +22,7 @@ type AppAction =
   | { type: 'ADD_SPONSOR'; payload: Sponsor }
   | { type: 'UPDATE_SPONSOR'; payload: Sponsor }
   | { type: 'DELETE_SPONSOR'; payload: string }
-  | { type: 'INITIALIZE_DATA' }
-  | { type: 'LOAD_SAMPLE_DATA' };
+  | { type: 'INITIALIZE_DATA' };
 
 const initialState: AppState = {
   camisetas: [],
@@ -98,7 +96,7 @@ function appReducer(state: AppState, action: AppAction): AppState {
     case 'INITIALIZE_DATA':
       const tamanhos: TamanhoCamiseta[] = ['PP', 'P', 'M', 'L', 'XL', 'XXL'];
       const sponsors = ['Bugcrowd', 'Intigriti', 'HackerOne'];
-      const sexos: SexoCamiseta[] = ['homem', 'mulher'];
+      const sexos: SexoCamiseta[] = ['masculino', 'feminino'];
       
       // Criar combinações de tamanho + sponsor + sexo
       const camisetasIniciais: Camiseta[] = [];
@@ -123,14 +121,6 @@ function appReducer(state: AppState, action: AppAction): AppState {
         camisetas: camisetasIniciais,
         swags: [],
         distribuicoes: []
-      };
-    
-    case 'LOAD_SAMPLE_DATA':
-      return {
-        ...state,
-        camisetas: sampleCamisetas,
-        swags: sampleSwags,
-        distribuicoes: sampleDistribuicoes
       };
     
     default:

@@ -12,22 +12,22 @@ export function CamisetasTab() {
   const [quantidadesDistribuidas, setQuantidadesDistribuidas] = useState<{ [key: string]: number }>({});
   
   // Estados para adicionar quantidade a combinações existentes
-  const [sponsorAdicionar, setSponsorAdicionar] = useState('Bugcrowd');
+  const [sponsorAdicionar, setSponsorAdicionar] = useState('');
   const [tamanhoAdicionar, setTamanhoAdicionar] = useState<TamanhoCamiseta>('M');
-  const [sexoAdicionar, setSexoAdicionar] = useState<'homem' | 'mulher'>('homem');
+  const [sexoAdicionar, setSexoAdicionar] = useState<'masculino' | 'feminino'>('masculino');
   const [quantidadeAdicionar, setQuantidadeAdicionar] = useState('');
   
   // Estados para registrar distribuição
-  const [sponsorDistribuir, setSponsorDistribuir] = useState('Bugcrowd');
+  const [sponsorDistribuir, setSponsorDistribuir] = useState('');
   const [tamanhoDistribuir, setTamanhoDistribuir] = useState<TamanhoCamiseta>('M');
-  const [sexoDistribuir, setSexoDistribuir] = useState<'homem' | 'mulher'>('homem');
+  const [sexoDistribuir, setSexoDistribuir] = useState<'masculino' | 'feminino'>('masculino');
   const [quantidadeDistribuir, setQuantidadeDistribuir] = useState('');
   
   // Estado para filtro de sponsor
   const [sponsorFiltro, setSponsorFiltro] = useState('todos');
   
-  // Lista de sponsors disponíveis
-  const sponsorsDisponiveis = ['Bugcrowd', 'Intigriti', 'HackerOne', 'BugHunt', 'PortSwigger'];
+  // Lista de sponsors disponíveis (carregada dinamicamente do Firestore)
+  const sponsorsDisponiveis = state.sponsors?.map(sponsor => sponsor.name) || [];
 
   useEffect(() => {
     // Carregar quantidades atuais
@@ -39,6 +39,15 @@ export function CamisetasTab() {
     
     setQuantidades(quantidadesAtuais);
   }, [state.camisetas]);
+
+  useEffect(() => {
+    // Atualizar sponsors selecionados quando os sponsors estiverem disponíveis
+    if (state.sponsors && state.sponsors.length > 0) {
+      const primeiroSponsor = state.sponsors[0].name;
+      if (!sponsorAdicionar) setSponsorAdicionar(primeiroSponsor);
+      if (!sponsorDistribuir) setSponsorDistribuir(primeiroSponsor);
+    }
+  }, [state.sponsors, sponsorAdicionar, sponsorDistribuir]);
 
   const handleQuantidadeChange = (camisetaId: string, valor: number) => {
     setQuantidades(prev => ({
@@ -227,10 +236,15 @@ export function CamisetasTab() {
                     className="form-select w-full"
                     value={sponsorAdicionar}
                     onChange={(e) => setSponsorAdicionar(e.target.value)}
+                    disabled={sponsorsDisponiveis.length === 0}
                   >
-                    {sponsorsDisponiveis.map(sponsor => (
-                      <option key={sponsor} value={sponsor}>{sponsor}</option>
-                    ))}
+                    {sponsorsDisponiveis.length === 0 ? (
+                      <option value="">Nenhum sponsor cadastrado</option>
+                    ) : (
+                      sponsorsDisponiveis.map(sponsor => (
+                        <option key={sponsor} value={sponsor}>{sponsor}</option>
+                      ))
+                    )}
                   </select>
                 </div>
                 
@@ -256,10 +270,10 @@ export function CamisetasTab() {
                   <select
                     className="form-select w-full"
                     value={sexoAdicionar}
-                    onChange={(e) => setSexoAdicionar(e.target.value as 'homem' | 'mulher')}
+                    onChange={(e) => setSexoAdicionar(e.target.value as 'masculino' | 'feminino')}
                   >
-                    <option value="homem">Homem</option>
-                    <option value="mulher">Mulher</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
                   </select>
                 </div>
                 
@@ -293,7 +307,7 @@ export function CamisetasTab() {
                 <button
                   className="btn btn-primary w-full"
                   onClick={adicionarQuantidade}
-                  disabled={!sponsorAdicionar.trim() || quantidadeAdicionar === '' || parseInt(quantidadeAdicionar) <= 0}
+                  disabled={!sponsorAdicionar.trim() || quantidadeAdicionar === '' || parseInt(quantidadeAdicionar) <= 0 || sponsorsDisponiveis.length === 0}
                 >
                   ➕ Adicionar Quantidade
                 </button>
@@ -320,10 +334,15 @@ export function CamisetasTab() {
                     className="form-select w-full"
                     value={sponsorDistribuir}
                     onChange={(e) => setSponsorDistribuir(e.target.value)}
+                    disabled={sponsorsDisponiveis.length === 0}
                   >
-                    {sponsorsDisponiveis.map(sponsor => (
-                      <option key={sponsor} value={sponsor}>{sponsor}</option>
-                    ))}
+                    {sponsorsDisponiveis.length === 0 ? (
+                      <option value="">Nenhum sponsor cadastrado</option>
+                    ) : (
+                      sponsorsDisponiveis.map(sponsor => (
+                        <option key={sponsor} value={sponsor}>{sponsor}</option>
+                      ))
+                    )}
                   </select>
                 </div>
                 
@@ -349,10 +368,10 @@ export function CamisetasTab() {
                   <select
                     className="form-select w-full"
                     value={sexoDistribuir}
-                    onChange={(e) => setSexoDistribuir(e.target.value as 'homem' | 'mulher')}
+                    onChange={(e) => setSexoDistribuir(e.target.value as 'masculino' | 'feminino')}
                   >
-                    <option value="homem">Homem</option>
-                    <option value="mulher">Mulher</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="feminino">Feminino</option>
                   </select>
                 </div>
                 
@@ -386,7 +405,7 @@ export function CamisetasTab() {
                 <button
                   className="btn btn-success w-full"
                   onClick={registrarDistribuicao}
-                  disabled={quantidadeDistribuir === '' || parseInt(quantidadeDistribuir) <= 0}
+                  disabled={quantidadeDistribuir === '' || parseInt(quantidadeDistribuir) <= 0 || sponsorsDisponiveis.length === 0}
                 >
                   📤 Registrar Distribuição
                 </button>
@@ -430,28 +449,35 @@ export function CamisetasTab() {
           >
             Todos
           </button>
-          {sponsorsDisponiveis.map(sponsor => (
-            <button
-              key={sponsor}
-              onClick={() => setSponsorFiltro(sponsor)}
-                           style={{
-               padding: '0.5rem 1rem',
-               borderRadius: '20px',
-               border: 'none',
-               cursor: 'pointer',
-               fontSize: '0.875rem',
-               fontWeight: '600',
-               backgroundColor: sponsorFiltro === sponsor ? 'var(--primary-color)' : 'var(--surface)',
-               color: sponsorFiltro === sponsor ? 'white' : 'var(--text-primary)',
-               borderWidth: '2px',
-               borderStyle: 'solid',
-               borderColor: sponsorFiltro === sponsor ? 'var(--primary-color)' : 'var(--border)',
-               transition: 'all 0.2s'
-             }}
-            >
-              {sponsor}
-            </button>
-          ))}
+          {sponsorsDisponiveis.length === 0 ? (
+            <div className="text-center py-4 text-gray-500">
+              <p>Nenhum sponsor cadastrado ainda.</p>
+              <p className="text-sm">Cadastre sponsors na aba "Sponsors" para começar.</p>
+            </div>
+          ) : (
+            sponsorsDisponiveis.map(sponsor => (
+              <button
+                key={sponsor}
+                onClick={() => setSponsorFiltro(sponsor)}
+                style={{
+                  padding: '0.5rem 1rem',
+                  borderRadius: '20px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                  backgroundColor: sponsorFiltro === sponsor ? 'var(--primary-color)' : 'var(--surface)',
+                  color: sponsorFiltro === sponsor ? 'white' : 'var(--text-primary)',
+                  borderWidth: '2px',
+                  borderStyle: 'solid',
+                  borderColor: sponsorFiltro === sponsor ? 'var(--primary-color)' : 'var(--border)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {sponsor}
+              </button>
+            ))
+          )}
         </div>
         
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4 justify-items-center">
@@ -461,7 +487,7 @@ export function CamisetasTab() {
             <div 
               key={camiseta.id} 
               className={`stat-card border-2 w-full max-w-[140px] ${
-                camiseta.sexo === 'homem' 
+                camiseta.sexo === 'masculino' 
                   ? 'border-blue-200 bg-blue-50' 
                   : 'border-pink-200 bg-pink-50'
               } ${
@@ -520,15 +546,15 @@ export function CamisetasTab() {
                  width: '100%'
                }}>
                  <div className="inline-flex items-center justify-center px-1.5 py-0.5 rounded-full text-xs font-medium" style={{
-                   backgroundColor: camiseta.sexo === 'homem' ? 'var(--primary-color)' : '#ec4899',
+                   backgroundColor: camiseta.sexo === 'masculino' ? 'var(--primary-color)' : '#ec4899',
                    color: 'white',
-                   border: `1px solid ${camiseta.sexo === 'homem' ? 'var(--primary-dark)' : '#be185d'}`,
+                   border: `1px solid ${camiseta.sexo === 'masculino' ? 'var(--primary-dark)' : '#be185d'}`,
                    borderRadius: '10px',
                    padding: '0.25rem 0.5rem',
                    width: 'fit-content',
                    minWidth: 'fit-content'
                  }}>
-                   {camiseta.sexo === 'homem' ? '👨 Homem' : '👩 Mulher'} - {camiseta.tamanho}
+                   {camiseta.sexo === 'masculino' ? '👨 Masculino' : '👩 Feminino'} - {camiseta.tamanho}
                  </div>
                </div>
               
@@ -538,7 +564,7 @@ export function CamisetasTab() {
                   ? 'var(--danger-color)' 
                   : camiseta.quantidadeAtual < 10 
                   ? '#dc2626' 
-                  : camiseta.sexo === 'homem' ? 'var(--primary-color)' : '#be185d'
+                  : camiseta.sexo === 'masculino' ? 'var(--primary-color)' : '#be185d'
               }}>
                 {camiseta.quantidadeAtual}
               </div>

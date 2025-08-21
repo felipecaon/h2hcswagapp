@@ -19,9 +19,11 @@ function AppContent() {
     // Initialize Firebase and load data from Firestore
     const initializeApp = async () => {
       try {
+        // eslint-disable-next-line no-console
         console.log('Initializing Firebase...');
         // Initialize Firebase
         await initializeFirebase();
+        // eslint-disable-next-line no-console
         console.log('Firebase initialized successfully');
         
         // Load data from Firestore
@@ -63,25 +65,10 @@ function AppContent() {
           unsubscribeSponsors();
         };
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error('Failed to initialize Firebase:', error);
-        // Fallback to localStorage if Firebase fails
-        const savedCamisetas = localStorage.getItem('camisetas');
-        const savedSwags = localStorage.getItem('swags');
-        const savedDistribuicoes = localStorage.getItem('distribuicoes');
-        
-        if (savedCamisetas && savedSwags) {
-          dispatch({ type: 'SET_CAMISETAS', payload: JSON.parse(savedCamisetas) });
-          dispatch({ type: 'SET_SWAGS', payload: JSON.parse(savedSwags) });
-          if (savedDistribuicoes) {
-            const distribuicoes = JSON.parse(savedDistribuicoes).map((d: any) => ({
-              ...d,
-              data: new Date(d.data)
-            }));
-            dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoes });
-          }
-        } else {
-          dispatch({ type: 'INITIALIZE_DATA' });
-        }
+        // Initialize with empty data if Firebase fails
+        dispatch({ type: 'INITIALIZE_DATA' });
       }
     };
     

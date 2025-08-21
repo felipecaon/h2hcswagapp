@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Plus, Edit, Trash2, ExternalLink } from 'lucide-react';
 import { firestoreService, Sponsor } from '../services/firestore';
 
 export function SponsorTab() {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
   const [showAddSponsor, setShowAddSponsor] = useState(false);
   const [showEditSponsor, setShowEditSponsor] = useState(false);
   const [selectedSponsor, setSelectedSponsor] = useState<Sponsor | null>(null);
@@ -50,6 +50,7 @@ export function SponsorTab() {
       
       alert('Sponsor adicionado com sucesso!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error adding sponsor:', error);
       alert('Erro ao adicionar sponsor. Tente novamente.');
     }
@@ -85,6 +86,7 @@ export function SponsorTab() {
 
       alert('Sponsor editado com sucesso!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error editing sponsor:', error);
       alert('Erro ao editar sponsor. Tente novamente.');
     }
@@ -99,6 +101,7 @@ export function SponsorTab() {
       await firestoreService.deleteSponsor(sponsor.id);
       alert(`Sponsor "${sponsor.name}" deletado com sucesso!`);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error deleting sponsor:', error);
       alert('Erro ao deletar sponsor. Tente novamente.');
     }

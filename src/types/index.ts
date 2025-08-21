@@ -1,5 +1,5 @@
 export type TamanhoCamiseta = 'PP' | 'P' | 'M' | 'L' | 'XL' | 'XXL';
-export type SexoCamiseta = 'homem' | 'mulher';
+export type SexoCamiseta = 'masculino' | 'feminino';
 
 export interface Camiseta {
   id: string;

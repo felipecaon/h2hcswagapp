@@ -10,7 +10,6 @@ import {
   query, 
   where, 
   orderBy, 
-  limit, 
   onSnapshot,
   writeBatch,
   serverTimestamp
@@ -44,6 +43,7 @@ class FirestoreService {
       if (!this.db) {
         throw new Error('Firebase not initialized. Call initializeFirebase() first.');
       }
+      // eslint-disable-next-line no-console
       console.log('Firestore database connection established');
     }
     return this.db;
@@ -67,6 +67,7 @@ class FirestoreService {
         } as Sponsor;
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting sponsors:', error);
       throw error;
     }
@@ -90,6 +91,7 @@ class FirestoreService {
       
       return null;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting sponsor:', error);
       throw error;
     }
@@ -109,6 +111,7 @@ class FirestoreService {
       const docRef = await addDoc(collection(this.getDb(), COLLECTIONS.SPONSORS), sponsorData);
       return docRef.id;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error adding sponsor:', error);
       throw error;
     }
@@ -125,6 +128,7 @@ class FirestoreService {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error updating sponsor:', error);
       throw error;
     }
@@ -138,6 +142,7 @@ class FirestoreService {
       const sponsorRef = doc(this.getDb(), COLLECTIONS.SPONSORS, id);
       await deleteDoc(sponsorRef);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error deleting sponsor:', error);
       throw error;
     }
@@ -161,6 +166,7 @@ class FirestoreService {
         } as Camiseta;
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting camisetas:', error);
       throw error;
     }
@@ -216,6 +222,7 @@ class FirestoreService {
    */
   async addCamiseta(camiseta: Omit<Camiseta, 'id'>): Promise<string> {
     try {
+      // eslint-disable-next-line no-console
       console.log('Adding camiseta:', camiseta);
       
       if (!validateCamiseta(camiseta)) {
@@ -223,13 +230,16 @@ class FirestoreService {
       }
 
       const camisetaData = toFirestore(camiseta);
+      // eslint-disable-next-line no-console
       console.log('Camiseta data for Firestore:', camisetaData);
       
       const docRef = await addDoc(collection(this.getDb(), COLLECTIONS.CAMISETAS), camisetaData);
+      // eslint-disable-next-line no-console
       console.log('Camiseta added with ID:', docRef.id);
       
       return docRef.id;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error adding camiseta:', error);
       throw error;
     }
@@ -240,6 +250,7 @@ class FirestoreService {
    */
   async updateCamiseta(id: string, updates: Partial<Omit<Camiseta, 'id'>>): Promise<void> {
     try {
+      // eslint-disable-next-line no-console
       console.log('Updating camiseta:', id, updates);
       
       const camisetaRef = doc(this.getDb(), COLLECTIONS.CAMISETAS, id);
@@ -248,11 +259,14 @@ class FirestoreService {
         updatedAt: serverTimestamp()
       };
       
+      // eslint-disable-next-line no-console
       console.log('Update data for Firestore:', updateData);
       await updateDoc(camisetaRef, updateData);
       
+      // eslint-disable-next-line no-console
       console.log('Camiseta updated successfully');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error updating camiseta:', error);
       throw error;
     }
@@ -266,6 +280,7 @@ class FirestoreService {
       const camisetaRef = doc(this.getDb(), COLLECTIONS.CAMISETAS, id);
       await deleteDoc(camisetaRef);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error deleting camiseta:', error);
       throw error;
     }
@@ -289,6 +304,7 @@ class FirestoreService {
         } as Swag;
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting swags:', error);
       throw error;
     }
@@ -312,6 +328,7 @@ class FirestoreService {
       
       return null;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting swag:', error);
       throw error;
     }
@@ -330,6 +347,7 @@ class FirestoreService {
       const docRef = await addDoc(collection(this.getDb(), COLLECTIONS.SWAGS), swagData);
       return docRef.id;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error adding swag:', error);
       throw error;
     }
@@ -346,6 +364,7 @@ class FirestoreService {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error updating swag:', error);
       throw error;
     }
@@ -359,6 +378,7 @@ class FirestoreService {
       const swagRef = doc(this.getDb(), COLLECTIONS.SWAGS, id);
       await deleteDoc(swagRef);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error deleting swag:', error);
       throw error;
     }
@@ -383,6 +403,7 @@ class FirestoreService {
         } as Distribuicao;
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting distribuicoes:', error);
       throw error;
     }
@@ -406,6 +427,7 @@ class FirestoreService {
       
       return null;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error getting distribuicao:', error);
       throw error;
     }
@@ -424,6 +446,7 @@ class FirestoreService {
       const docRef = await addDoc(collection(this.getDb(), COLLECTIONS.DISTRIBUICOES), distribuicaoData);
       return docRef.id;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error adding distribuicao:', error);
       throw error;
     }
@@ -440,6 +463,7 @@ class FirestoreService {
         updatedAt: serverTimestamp()
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error updating distribuicao:', error);
       throw error;
     }
@@ -453,6 +477,7 @@ class FirestoreService {
       const distribuicaoRef = doc(this.getDb(), COLLECTIONS.DISTRIBUICOES, id);
       await deleteDoc(distribuicaoRef);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error deleting distribuicao:', error);
       throw error;
     }
@@ -559,6 +584,7 @@ class FirestoreService {
       
       await batch.commit();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error in batch update:', error);
       throw error;
     }
@@ -569,15 +595,18 @@ class FirestoreService {
    */
   async testConnection(): Promise<boolean> {
     try {
+      // eslint-disable-next-line no-console
       console.log('Testing Firestore connection...');
       
       // Try to read from a collection (this should work even if empty)
       const testRef = collection(this.getDb(), 'test');
       await getDocs(testRef);
       
+      // eslint-disable-next-line no-console
       console.log('Firestore connection test successful');
       return true;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Firestore connection test failed:', error);
       return false;
     }
@@ -609,8 +638,10 @@ class FirestoreService {
         await this.addSponsor(sponsor);
       }
 
+      // eslint-disable-next-line no-console
       console.log('Default data initialized successfully');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error initializing default data:', error);
       throw error;
     }

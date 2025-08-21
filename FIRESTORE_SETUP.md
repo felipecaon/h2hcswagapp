@@ -126,7 +126,7 @@ import {
 const camiseta = {
   tamanho: 'M',
   sponsor: 'Bugcrowd',
-  sexo: 'homem',
+          sexo: 'masculino',
   quantidadeAtual: 10
 };
 

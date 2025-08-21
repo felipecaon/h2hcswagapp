@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Swag, Distribuicao } from '../types';
-import { Plus, Gift, Download, Edit, Trash2 } from 'lucide-react';
+import { Plus, Gift, Download } from 'lucide-react';
 import { firestoreService } from '../services/firestore';
 
 export function SwagsTab() {
-  const { state, dispatch } = useApp();
+  const { state } = useApp();
   const [showAddSwag, setShowAddSwag] = useState(false);
   const [showDistribuicao, setShowDistribuicao] = useState(false);
   const [showEditDistribuicao, setShowEditDistribuicao] = useState(false);
@@ -56,6 +56,7 @@ export function SwagsTab() {
       
       alert('Swag adicionado com sucesso!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error adding swag:', error);
       alert('Erro ao adicionar swag. Tente novamente.');
     }
@@ -101,6 +102,7 @@ export function SwagsTab() {
       
       alert('Distribuição registrada com sucesso!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error registering distribution:', error);
       alert('Erro ao registrar distribuição. Tente novamente.');
     }
@@ -138,6 +140,7 @@ export function SwagsTab() {
 
       alert('Distribuição editada com sucesso!');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error editing distribution:', error);
       alert('Erro ao editar distribuição. Tente novamente.');
     }
@@ -164,6 +167,7 @@ export function SwagsTab() {
 
       alert(`Distribuição deletada! ${distribuicao.quantidade} unidade(s) devolvida(s) ao estoque.`);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error deleting distribution:', error);
       alert('Erro ao deletar distribuição. Tente novamente.');
     }
