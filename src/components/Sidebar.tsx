@@ -1,5 +1,5 @@
 import React from 'react';
-import { Shirt, Gift, Package } from 'lucide-react';
+import { Shirt, Gift, Building2 } from 'lucide-react';
 
 interface SidebarProps {
   activeSection: string;
@@ -20,6 +20,11 @@ export function Sidebar({ activeSection, onSectionChange, isOpen }: SidebarProps
           id: 'swags',
           name: 'Swags',
           icon: Gift
+        },
+        {
+          id: 'sponsors',
+          name: 'Sponsors',
+          icon: Building2
         }
       ]
     }
@@ -30,11 +35,6 @@ export function Sidebar({ activeSection, onSectionChange, isOpen }: SidebarProps
       <div className="nav-menu">
         {/* Logo/Brand */}
         <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex items-center gap-3">
-            <div>
-              <h1 className="font-bold text-lg text-gray-900">BBV Swag</h1>
-            </div>
-          </div>
         </div>
 
         {/* Navigation Items */}

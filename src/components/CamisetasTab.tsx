@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { TamanhoCamiseta, Camiseta } from '../types';
 import { Plus, Minus, Save, Download, Building2 } from 'lucide-react';
+import { firestoreService } from '../services/firestore';
 
 export function CamisetasTab() {
   const { state, dispatch } = useApp();
@@ -76,7 +77,7 @@ export function CamisetasTab() {
     alert('Quantidades salvas com sucesso!');
   };
 
-  const registrarDistribuicao = () => {
+  const registrarDistribuicao = async () => {
     // Encontrar a camiseta específica
     const camiseta = state.camisetas.find(
       c => c.tamanho === tamanhoDistribuir && c.sponsor === sponsorDistribuir && c.sexo === sexoDistribuir
@@ -98,31 +99,38 @@ export function CamisetasTab() {
       return;
     }
     
-    // Atualizar a camiseta
-    const novaQuantidadeAtual = Math.max(0, camiseta.quantidadeAtual - quantidade);
-    
-    // Atualizar no estado global
-    const camisetasAtualizadas = state.camisetas.map(c => 
-      c.id === camiseta.id 
-        ? { ...c, quantidadeAtual: novaQuantidadeAtual, quantidadeDistribuida: c.quantidadeDistribuida + quantidade }
-        : c
-    );
-    
-    dispatch({ type: 'SET_CAMISETAS', payload: camisetasAtualizadas });
-    
-    // Salvar no localStorage
-    localStorage.setItem('camisetas', JSON.stringify(camisetasAtualizadas));
-    
-    // Limpar formulário
-    setQuantidadeDistribuir('');
-    
-    alert('Distribuição registrada com sucesso!');
+    try {
+      // Atualizar a camiseta no Firestore
+      const novaQuantidadeAtual = Math.max(0, camiseta.quantidadeAtual - quantidade);
+      
+      await firestoreService.updateCamiseta(camiseta.id, {
+        quantidadeAtual: novaQuantidadeAtual,
+        quantidadeDistribuida: camiseta.quantidadeDistribuida + quantidade
+      });
+      
+      // Limpar formulário
+      setQuantidadeDistribuir('');
+      
+      alert('Distribuição registrada com sucesso!');
+    } catch (error) {
+      console.error('Error registering distribution:', error);
+      
+      // Mostrar erro mais específico
+      let errorMessage = 'Erro ao registrar distribuição. ';
+      if (error instanceof Error) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Tente novamente.';
+      }
+      
+      alert(errorMessage);
+    }
   };
 
   const totalDistribuido = Object.values(quantidadesDistribuidas).reduce((sum, qty) => sum + qty, 0);
 
   // Função para adicionar quantidade a combinação existente ou criar nova
-  const adicionarQuantidade = () => {
+  const adicionarQuantidade = async () => {
     if (!sponsorAdicionar.trim()) {
       alert('Por favor, selecione um sponsor');
       return;
@@ -134,51 +142,50 @@ export function CamisetasTab() {
       return;
     }
     
-    // Verificar se existe essa combinação
-    const camisetaExistente = state.camisetas.find(
-      c => c.tamanho === tamanhoAdicionar && c.sponsor === sponsorAdicionar && c.sexo === sexoAdicionar
-    );
-    
-    let camisetasAtualizadas: Camiseta[];
-    
-    if (camisetaExistente) {
-      // Atualizar a camiseta existente
-      const camisetaAtualizada: Camiseta = {
-        ...camisetaExistente,
-        quantidadeInicial: camisetaExistente.quantidadeInicial + quantidade,
-        quantidadeAtual: camisetaExistente.quantidadeAtual + quantidade
-      };
-      
-      camisetasAtualizadas = state.camisetas.map(c => 
-        c.id === camisetaExistente.id ? camisetaAtualizada : c
+    try {
+      // Verificar se existe essa combinação
+      const camisetaExistente = state.camisetas.find(
+        c => c.tamanho === tamanhoAdicionar && c.sponsor === sponsorAdicionar && c.sexo === sexoAdicionar
       );
       
-      alert(`Quantidade adicionada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar} para ${sexoAdicionar}`);
-    } else {
-      // Criar uma nova combinação
-      const novaCamiseta: Camiseta = {
-        id: `${tamanhoAdicionar}-${sponsorAdicionar.toLowerCase()}-${sexoAdicionar}`,
-        tamanho: tamanhoAdicionar,
-        sponsor: sponsorAdicionar,
-        sexo: sexoAdicionar,
-        quantidadeInicial: quantidade,
-        quantidadeAtual: quantidade,
-        quantidadeDistribuida: 0
-      };
+      if (camisetaExistente) {
+        // Atualizar a camiseta existente
+        await firestoreService.updateCamiseta(camisetaExistente.id, {
+          quantidadeInicial: camisetaExistente.quantidadeInicial + quantidade,
+          quantidadeAtual: camisetaExistente.quantidadeAtual + quantidade
+        });
+        
+        alert(`Quantidade adicionada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar} para ${sexoAdicionar}`);
+      } else {
+        // Criar uma nova combinação
+        const novaCamiseta: Omit<Camiseta, 'id'> = {
+          tamanho: tamanhoAdicionar,
+          sponsor: sponsorAdicionar,
+          sexo: sexoAdicionar,
+          quantidadeInicial: quantidade,
+          quantidadeAtual: quantidade,
+          quantidadeDistribuida: 0
+        };
+        
+        await firestoreService.addCamiseta(novaCamiseta);
+        
+        alert(`Nova combinação criada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar} para ${sexoAdicionar}`);
+      }
       
-      camisetasAtualizadas = [...state.camisetas, novaCamiseta];
+      setQuantidadeAdicionar('');
+    } catch (error) {
+      console.error('Error adding quantity:', error);
       
-      alert(`Nova combinação criada com sucesso! ${quantidade} camisetas ${tamanhoAdicionar} da ${sponsorAdicionar} para ${sexoAdicionar}`);
+      // Mostrar erro mais específico
+      let errorMessage = 'Erro ao adicionar quantidade. ';
+      if (error instanceof Error) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Tente novamente.';
+      }
+      
+      alert(errorMessage);
     }
-    
-    // Atualizar no estado
-    dispatch({ type: 'SET_CAMISETAS', payload: camisetasAtualizadas });
-    
-    // Salvar no localStorage
-    localStorage.setItem('camisetas', JSON.stringify(camisetasAtualizadas));
-    
-    // Limpar formulário
-    setQuantidadeAdicionar('');
   };
 
   // Agrupar camisetas por sponsor para exibição

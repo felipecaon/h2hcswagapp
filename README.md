@@ -26,7 +26,7 @@
 - **Estado**: Context API + useReducer
 - **Estilo**: CSS Custom Properties + Flexbox/Grid
 - **PWA**: Progressive Web App para mobile
-- **Storage**: LocalStorage para persistência offline
+- **Database**: Firebase/Firestore para persistência em tempo real
 - **Icons**: Lucide React
 - **Build**: Create React App
 
@@ -65,6 +65,10 @@ git clone [url-do-repo]
 # Instale as dependências
 npm install
 
+# Configure Firebase (veja FIRESTORE_SETUP.md)
+cp env.template .env
+# Edite .env com suas credenciais Firebase
+
 # Execute em desenvolvimento
 npm start
 
@@ -73,10 +77,11 @@ npm run build
 ```
 
 ### **Uso Rápido**
-1. **Acesse** o app no navegador
-2. **Clique** em "Demo Data" para carregar dados de exemplo
-3. **Navegue** entre as abas "Camisetas" e "Swags"
-4. **Gerencie** estoque e distribuições
+1. **Configure** Firebase (veja FIRESTORE_SETUP.md)
+2. **Acesse** o app no navegador
+3. **Clique** em "Init Firestore" para inicializar dados padrão
+4. **Navegue** entre as abas "Camisetas" e "Swags"
+5. **Gerencie** estoque e distribuições em tempo real
 
 ## 📊 **Estrutura do Projeto**
 
@@ -88,8 +93,12 @@ src/
 │   └── Sidebar.tsx         # Menu lateral
 ├── context/            # Estado global
 │   └── AppContext.tsx      # Context API
-├── data/               # Dados de exemplo
-│   └── sampleData.ts       # Swags e camisetas padrão
+├── services/           # Serviços Firebase
+│   └── firestore.ts        # Operações Firestore
+├── config/             # Configuração Firebase
+│   └── firebase.ts         # Inicialização Firebase
+├── utils/              # Utilitários
+│   └── firestore.ts        # Helpers Firestore
 ├── types/              # Definições TypeScript
 │   └── index.ts            # Interfaces e tipos
 └── index.css           # Sistema de design
@@ -97,26 +106,31 @@ src/
 
 ## 🔧 **Configuração**
 
+### **Firebase Setup**
+1. **Crie** um projeto no [Firebase Console](https://console.firebase.google.com/)
+2. **Configure** Firestore Database
+3. **Copie** as credenciais para `.env`
+4. **Execute** "Init Firestore" no app
+
 ### **Sponsors Personalizados**
-Edite `src/components/CamisetasTab.tsx`:
+Edite `src/services/firestore.ts`:
 ```typescript
-const sponsorsDisponiveis = [
+const defaultSponsors = [
   'Bugcrowd', 'Intigriti', 'HackerOne', 
   'BugHunt', 'PortSwigger'
 ];
 ```
 
 ### **Novos Swags**
-Adicione em `src/data/sampleData.ts`:
-```typescript
-export const sampleSwags: Swag[] = [
-  // Seus novos swags aqui
-];
-```
+Use o botão "Adicionar Swag" no app ou edite diretamente no Firestore.
 
 ## 📈 **Roadmap**
 
-- [ ] **Backend Integration**: API REST para persistência
+- [x] **Firebase Integration**: Firestore para persistência em tempo real
+- [ ] **Authentication**: Login de usuários
+- [ ] **Real-time Updates**: Sincronização automática entre dispositivos
+- [ ] **Offline Support**: Funcionamento sem conexão
+- [ ] **Advanced Analytics**: Relatórios e métricas
 - [ ] **Multi-User**: Sistema de usuários e permissões
 - [ ] **Analytics**: Dashboards e relatórios avançados
 - [ ] **QR Code**: Sistema de distribuição por QR

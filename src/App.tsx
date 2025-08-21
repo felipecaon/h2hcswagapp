@@ -4,9 +4,11 @@ import { Sidebar } from './components/Sidebar';
 
 import { CamisetasTab } from './components/CamisetasTab';
 import { SwagsTab } from './components/SwagsTab';
+import { SponsorTab } from './components/SponsorTab';
 
 import { Menu, X, Sparkles } from 'lucide-react';
-import { sampleCamisetas, sampleSwags, sampleDistribuicoes } from './data/sampleData';
+import { initializeFirebase } from './config/firebase';
+import { firestoreService } from './services/firestore';
 
 function AppContent() {
   const { dispatch } = useApp();
@@ -14,26 +16,76 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    // Carregar dados salvos no localStorage primeiro
-    const savedCamisetas = localStorage.getItem('camisetas');
-    const savedSwags = localStorage.getItem('swags');
-    const savedDistribuicoes = localStorage.getItem('distribuicoes');
-    
-    if (savedCamisetas && savedSwags) {
-      // Se há dados salvos, carregar eles
-      dispatch({ type: 'SET_CAMISETAS', payload: JSON.parse(savedCamisetas) });
-      dispatch({ type: 'SET_SWAGS', payload: JSON.parse(savedSwags) });
-      if (savedDistribuicoes) {
-        const distribuicoes = JSON.parse(savedDistribuicoes).map((d: any) => ({
-          ...d,
-          data: new Date(d.data)
-        }));
+    // Initialize Firebase and load data from Firestore
+    const initializeApp = async () => {
+      try {
+        console.log('Initializing Firebase...');
+        // Initialize Firebase
+        await initializeFirebase();
+        console.log('Firebase initialized successfully');
+        
+        // Load data from Firestore
+        const [camisetas, swags, distribuicoes, sponsors] = await Promise.all([
+          firestoreService.getCamisetas(),
+          firestoreService.getSwags(),
+          firestoreService.getDistribuicoes(),
+          firestoreService.getSponsors()
+        ]);
+        
+        // Update state with Firestore data
+        dispatch({ type: 'SET_CAMISETAS', payload: camisetas });
+        dispatch({ type: 'SET_SWAGS', payload: swags });
         dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoes });
+        dispatch({ type: 'SET_SPONSORS', payload: sponsors });
+        
+        // Set up real-time subscriptions
+        const unsubscribeCamisetas = firestoreService.subscribeToCamisetas((camisetas) => {
+          dispatch({ type: 'SET_CAMISETAS', payload: camisetas });
+        });
+        
+        const unsubscribeSwags = firestoreService.subscribeToSwags((swags) => {
+          dispatch({ type: 'SET_SWAGS', payload: swags });
+        });
+        
+        const unsubscribeDistribuicoes = firestoreService.subscribeToDistribuicoes((distribuicoes) => {
+          dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoes });
+        });
+        
+        const unsubscribeSponsors = firestoreService.subscribeToSponsors((sponsors) => {
+          dispatch({ type: 'SET_SPONSORS', payload: sponsors });
+        });
+        
+        // Cleanup subscriptions on unmount
+        return () => {
+          unsubscribeCamisetas();
+          unsubscribeSwags();
+          unsubscribeDistribuicoes();
+          unsubscribeSponsors();
+        };
+      } catch (error) {
+        console.error('Failed to initialize Firebase:', error);
+        // Fallback to localStorage if Firebase fails
+        const savedCamisetas = localStorage.getItem('camisetas');
+        const savedSwags = localStorage.getItem('swags');
+        const savedDistribuicoes = localStorage.getItem('distribuicoes');
+        
+        if (savedCamisetas && savedSwags) {
+          dispatch({ type: 'SET_CAMISETAS', payload: JSON.parse(savedCamisetas) });
+          dispatch({ type: 'SET_SWAGS', payload: JSON.parse(savedSwags) });
+          if (savedDistribuicoes) {
+            const distribuicoes = JSON.parse(savedDistribuicoes).map((d: any) => ({
+              ...d,
+              data: new Date(d.data)
+            }));
+            dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoes });
+          }
+        } else {
+          dispatch({ type: 'INITIALIZE_DATA' });
+        }
       }
-    } else {
-      // Se não há dados salvos, inicializar com dados padrão
-      dispatch({ type: 'INITIALIZE_DATA' });
-    }
+    };
+    
+    initializeApp();
   }, [dispatch]);
 
   // Detectar tamanho da tela e ajustar sidebar
@@ -61,6 +113,8 @@ function AppContent() {
         return <CamisetasTab />;
       case 'swags':
         return <SwagsTab />;
+      case 'sponsors':
+        return <SponsorTab />;
       default:
         return <CamisetasTab />;
     }
@@ -100,21 +154,7 @@ function AppContent() {
               </div>
             </div>
             
-            <div className="header-actions">
-              <button
-                className="btn btn-primary btn-sm"
-                onClick={() => {
-                  dispatch({ type: 'LOAD_SAMPLE_DATA' });
-                  localStorage.setItem('camisetas', JSON.stringify(sampleCamisetas));
-                  localStorage.setItem('swags', JSON.stringify(sampleSwags));
-                  localStorage.setItem('distribuicoes', JSON.stringify(sampleDistribuicoes));
-                  alert('✨ Dados de exemplo carregados com sucesso!');
-                }}
-              >
-                <Sparkles size={16} />
-                Demo Data
-              </button>
-            </div>
+
           </div>
         </header>
 

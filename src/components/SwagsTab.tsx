@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Swag, Distribuicao } from '../types';
-import { Plus, Gift, Download } from 'lucide-react';
+import { Plus, Gift, Download, Edit, Trash2 } from 'lucide-react';
+import { firestoreService } from '../services/firestore';
 
 export function SwagsTab() {
   const { state, dispatch } = useApp();
@@ -15,7 +16,7 @@ export function SwagsTab() {
   const [novoSwag, setNovoSwag] = useState({
     nome: '',
     tipo: 'OUTRO' as const,
-    quantidadeInicial: 0
+    quantidadeInicial: ''
   });
 
   // Formulário de distribuição
@@ -31,35 +32,36 @@ export function SwagsTab() {
     emailGanhador: ''
   });
 
-  const handleAddSwag = () => {
-    if (!novoSwag.nome || novoSwag.quantidadeInicial <= 0) {
+  const handleAddSwag = async () => {
+    const quantidade = parseInt(novoSwag.quantidadeInicial);
+    if (!novoSwag.nome || isNaN(quantidade) || quantidade <= 0) {
       alert('Por favor, preencha todos os campos corretamente.');
       return;
     }
 
-    const swag: Swag = {
-      id: Date.now().toString(),
-      nome: novoSwag.nome,
-      tipo: novoSwag.tipo,
-      quantidadeInicial: novoSwag.quantidadeInicial,
-      quantidadeAtual: novoSwag.quantidadeInicial,
-      quantidadeDistribuida: 0
-    };
+    try {
+      const swag: Omit<Swag, 'id'> = {
+        nome: novoSwag.nome,
+        tipo: novoSwag.tipo,
+        quantidadeInicial: quantidade,
+        quantidadeAtual: quantidade,
+        quantidadeDistribuida: 0
+      };
 
-    dispatch({ type: 'ADD_SWAG', payload: swag });
-    
-    // Salvar no localStorage
-    const swagsAtualizados = [...state.swags, swag];
-    localStorage.setItem('swags', JSON.stringify(swagsAtualizados));
-    
-    // Limpar formulário
-    setNovoSwag({ nome: '', tipo: 'OUTRO', quantidadeInicial: 0 });
-    setShowAddSwag(false);
-    
-    alert('Swag adicionado com sucesso!');
+      await firestoreService.addSwag(swag);
+      
+      // Limpar formulário
+      setNovoSwag({ nome: '', tipo: 'OUTRO', quantidadeInicial: '' });
+      setShowAddSwag(false);
+      
+      alert('Swag adicionado com sucesso!');
+    } catch (error) {
+      console.error('Error adding swag:', error);
+      alert('Erro ao adicionar swag. Tente novamente.');
+    }
   };
 
-  const handleDistribuicao = () => {
+  const handleDistribuicao = async () => {
     if (!selectedSwag) return;
     
     if (distribuicao.quantidade <= 0 || distribuicao.quantidade > selectedSwag.quantidadeAtual) {
@@ -72,43 +74,36 @@ export function SwagsTab() {
       return;
     }
 
-    // Criar distribuição
-    const novaDistribuicao: Distribuicao = {
-      id: Date.now().toString(),
-      swagId: selectedSwag.id,
-      swagNome: selectedSwag.nome,
-      swagTipo: selectedSwag.tipo,
-      quantidade: distribuicao.quantidade,
-      nomeGanhador: distribuicao.nomeGanhador || undefined,
-      emailGanhador: distribuicao.emailGanhador || undefined,
-      data: new Date()
-    };
+    try {
+      // Criar distribuição
+      const novaDistribuicao: Omit<Distribuicao, 'id'> = {
+        swagId: selectedSwag.id,
+        swagNome: selectedSwag.nome,
+        swagTipo: selectedSwag.tipo,
+        quantidade: distribuicao.quantidade,
+        nomeGanhador: distribuicao.nomeGanhador || undefined,
+        emailGanhador: distribuicao.emailGanhador || undefined,
+        data: new Date()
+      };
 
-    dispatch({ type: 'ADD_DISTRIBUICAO', payload: novaDistribuicao });
+      await firestoreService.addDistribuicao(novaDistribuicao);
 
-    // Atualizar estoque do swag
-    const swagAtualizado: Swag = {
-      ...selectedSwag,
-      quantidadeAtual: selectedSwag.quantidadeAtual - distribuicao.quantidade,
-      quantidadeDistribuida: selectedSwag.quantidadeDistribuida + distribuicao.quantidade
-    };
-
-    const swagsAtualizados = state.swags.map(s => 
-      s.id === selectedSwag.id ? swagAtualizado : s
-    );
-    
-    dispatch({ type: 'SET_SWAGS', payload: swagsAtualizados });
-    
-    // Salvar no localStorage
-    localStorage.setItem('swags', JSON.stringify(swagsAtualizados));
-    localStorage.setItem('distribuicoes', JSON.stringify([...(state.distribuicoes || []), novaDistribuicao]));
-    
-    // Limpar formulário
-    setDistribuicao({ quantidade: 1, nomeGanhador: '', emailGanhador: '' });
-    setSelectedSwag(null);
-    setShowDistribuicao(false);
-    
-    alert('Distribuição registrada com sucesso!');
+      // Atualizar estoque do swag
+      await firestoreService.updateSwag(selectedSwag.id, {
+        quantidadeAtual: selectedSwag.quantidadeAtual - distribuicao.quantidade,
+        quantidadeDistribuida: selectedSwag.quantidadeDistribuida + distribuicao.quantidade
+      });
+      
+      // Limpar formulário
+      setDistribuicao({ quantidade: 1, nomeGanhador: '', emailGanhador: '' });
+      setSelectedSwag(null);
+      setShowDistribuicao(false);
+      
+      alert('Distribuição registrada com sucesso!');
+    } catch (error) {
+      console.error('Error registering distribution:', error);
+      alert('Erro ao registrar distribuição. Tente novamente.');
+    }
   };
 
   const openDistribuicao = (swag: Swag) => {
@@ -126,69 +121,52 @@ export function SwagsTab() {
     setShowEditDistribuicao(true);
   };
 
-  const handleEditDistribuicao = () => {
+  const handleEditDistribuicao = async () => {
     if (!selectedDistribuicao) return;
 
-    // Atualizar a distribuição
-    const distribuicaoAtualizada: Distribuicao = {
-      ...selectedDistribuicao,
-      nomeGanhador: editDistribuicao.nomeGanhador || undefined,
-      emailGanhador: editDistribuicao.emailGanhador || undefined
-    };
+    try {
+      // Atualizar a distribuição no Firestore
+      await firestoreService.updateDistribuicao(selectedDistribuicao.id, {
+        nomeGanhador: editDistribuicao.nomeGanhador || undefined,
+        emailGanhador: editDistribuicao.emailGanhador || undefined
+      });
 
-    // Atualizar no estado global
-    const distribuicoesAtualizadas = (state.distribuicoes || []).map(d => 
-      d.id === selectedDistribuicao.id ? distribuicaoAtualizada : d
-    );
+      // Limpar e fechar
+      setEditDistribuicao({ nomeGanhador: '', emailGanhador: '' });
+      setSelectedDistribuicao(null);
+      setShowEditDistribuicao(false);
 
-    dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoesAtualizadas });
-
-    // Salvar no localStorage
-    localStorage.setItem('distribuicoes', JSON.stringify(distribuicoesAtualizadas));
-
-    // Limpar e fechar
-    setEditDistribuicao({ nomeGanhador: '', emailGanhador: '' });
-    setSelectedDistribuicao(null);
-    setShowEditDistribuicao(false);
-
-    alert('Distribuição editada com sucesso!');
+      alert('Distribuição editada com sucesso!');
+    } catch (error) {
+      console.error('Error editing distribution:', error);
+      alert('Erro ao editar distribuição. Tente novamente.');
+    }
   };
 
-  const handleDeleteDistribuicao = (distribuicao: Distribuicao) => {
+  const handleDeleteDistribuicao = async (distribuicao: Distribuicao) => {
     if (!window.confirm(`Tem certeza que deseja deletar a distribuição de "${distribuicao.swagNome}"?`)) {
       return;
     }
 
-    // Encontrar o swag correspondente
-    const swag = state.swags.find(s => s.id === distribuicao.swagId);
-    if (!swag) return;
+    try {
+      // Encontrar o swag correspondente
+      const swag = state.swags.find(s => s.id === distribuicao.swagId);
+      if (!swag) return;
 
-    // Devolver quantidade ao estoque
-    const swagAtualizado: Swag = {
-      ...swag,
-      quantidadeAtual: swag.quantidadeAtual + distribuicao.quantidade,
-      quantidadeDistribuida: swag.quantidadeDistribuida - distribuicao.quantidade
-    };
+      // Devolver quantidade ao estoque
+      await firestoreService.updateSwag(swag.id, {
+        quantidadeAtual: swag.quantidadeAtual + distribuicao.quantidade,
+        quantidadeDistribuida: swag.quantidadeDistribuida - distribuicao.quantidade
+      });
 
-    // Atualizar swags
-    const swagsAtualizados = state.swags.map(s => 
-      s.id === swag.id ? swagAtualizado : s
-    );
+      // Remover distribuição
+      await firestoreService.deleteDistribuicao(distribuicao.id);
 
-    // Remover distribuição
-    const distribuicoesAtualizadas = (state.distribuicoes || []).filter(d => 
-      d.id !== distribuicao.id
-    );
-
-    // Atualizar estado global
-    dispatch({ type: 'SET_SWAGS', payload: swagsAtualizados });
-    dispatch({ type: 'SET_DISTRIBUICOES', payload: distribuicoesAtualizadas });
-
-    // Salvar no localStorage
-    localStorage.setItem('swags', JSON.stringify(swagsAtualizados));
-    localStorage.setItem('distribuicoes', JSON.stringify(distribuicoesAtualizadas));
-
-    alert(`Distribuição deletada! ${distribuicao.quantidade} unidade(s) devolvida(s) ao estoque.`);
+      alert(`Distribuição deletada! ${distribuicao.quantidade} unidade(s) devolvida(s) ao estoque.`);
+    } catch (error) {
+      console.error('Error deleting distribution:', error);
+      alert('Erro ao deletar distribuição. Tente novamente.');
+    }
   };
 
   const getTipoLabel = (tipo: string) => {
@@ -473,11 +451,21 @@ export function SwagsTab() {
             <div className="form-group">
               <label className="form-label">Quantidade Inicial</label>
               <input
-                type="number"
+                type="text"
                 className="form-input"
                 value={novoSwag.quantidadeInicial}
-                onChange={(e) => setNovoSwag(prev => ({ ...prev, quantidadeInicial: parseInt(e.target.value) || 0 }))}
-                min="1"
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === '' || /^\d+$/.test(value)) {
+                    setNovoSwag(prev => ({ ...prev, quantidadeInicial: value }));
+                  }
+                }}
+                onKeyPress={(e) => {
+                  if (!/\d/.test(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                placeholder="Digite apenas números"
               />
             </div>
             

@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
 import { Camiseta, Swag, Distribuicao, TamanhoCamiseta, SexoCamiseta } from '../types';
 import { sampleCamisetas, sampleSwags, sampleDistribuicoes } from '../data/sampleData';
+import { Sponsor } from '../services/firestore';
 
 interface AppState {
   camisetas: Camiseta[];
   swags: Swag[];
   distribuicoes: Distribuicao[];
+  sponsors: Sponsor[];
 }
 
 type AppAction =
@@ -17,13 +19,18 @@ type AppAction =
   | { type: 'UPDATE_SWAG'; payload: { id: string; quantidade: number } }
   | { type: 'ADD_DISTRIBUICAO'; payload: Distribuicao }
   | { type: 'SET_DISTRIBUICOES'; payload: Distribuicao[] }
+  | { type: 'SET_SPONSORS'; payload: Sponsor[] }
+  | { type: 'ADD_SPONSOR'; payload: Sponsor }
+  | { type: 'UPDATE_SPONSOR'; payload: Sponsor }
+  | { type: 'DELETE_SPONSOR'; payload: string }
   | { type: 'INITIALIZE_DATA' }
   | { type: 'LOAD_SAMPLE_DATA' };
 
 const initialState: AppState = {
   camisetas: [],
   swags: [],
-  distribuicoes: []
+  distribuicoes: [],
+  sponsors: []
 };
 
 function appReducer(state: AppState, action: AppAction): AppState {
@@ -67,6 +74,26 @@ function appReducer(state: AppState, action: AppAction): AppState {
     
     case 'SET_DISTRIBUICOES':
       return { ...state, distribuicoes: action.payload };
+    
+    case 'SET_SPONSORS':
+      return { ...state, sponsors: action.payload };
+    
+    case 'ADD_SPONSOR':
+      return { ...state, sponsors: [...state.sponsors, action.payload] };
+    
+    case 'UPDATE_SPONSOR':
+      return {
+        ...state,
+        sponsors: state.sponsors.map(sponsor =>
+          sponsor.id === action.payload.id ? action.payload : sponsor
+        )
+      };
+    
+    case 'DELETE_SPONSOR':
+      return {
+        ...state,
+        sponsors: state.sponsors.filter(sponsor => sponsor.id !== action.payload)
+      };
     
     case 'INITIALIZE_DATA':
       const tamanhos: TamanhoCamiseta[] = ['PP', 'P', 'M', 'L', 'XL', 'XXL'];
